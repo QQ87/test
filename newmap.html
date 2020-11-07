@@ -22,34 +22,39 @@
     </style>
 </head>
 <body>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
-    <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-    <script src="https://raw.githack.com/mrdoob/three.js/dev/examples/js/loaders/MTLLoader.js"></script>
-    <script src="https://raw.githack.com/mrdoob/three.js/dev/examples/js/loaders/OBJLoader.js"></script>
-
 
     
-    <script>
-        var camera, scene, renderer, cameraHUD;
+    <script type=module>
+      import * as THREE from 'https://raw.githack.com/mrdoob/three.js/dev/build/three.module.js';
+      import { OrbitControls } from 'https://raw.githack.com/mrdoob/three.js/dev/examples/jsm/controls/OrbitControls.js';
+      import { MTLLoader } from 'https://raw.githack.com/mrdoob/three.js/dev/examples/jsm/loaders/MTLLoader.js';
+      import { OBJLoader } from 'https://raw.githack.com/mrdoob/three.js/dev/examples/jsm/loaders/OBJLoader.js';
+      import { DDSLoader } from 'https://raw.githack.com/mrdoob/three.js/master/examples/jsm/loaders/DDSLoader.js';
+      
+
+var Islocal = 1; ///圖片路徑  1 = 路徑     else = imgur
+
+var camera, camera2, scene, renderer, cameraHUD, sceneRTT, renderTarget;
 var leftdoor, rightdoor, windowdoor;
+var Rleftdoor, Rrightdoor, Rwindowdoor;
 var wallheight = 60,  windowsize = 40;
 var lightstate1 = 0,  lightstate2 = 0,  lightstate3 = 0;
-var light1, light2, light3;
+var light1, light11, light12, light2, light21, light22, light3;
+var Rlight1, Rlight11, Rlight12, Rlight2, Rlight21, Rlight22, Rlight3;
 var rightwallstate = 1,  leftwallstate = 1,  windowdoorstate = 1;
 var mouse = new THREE.Vector2();
 var raycaster = new THREE.Raycaster();
 var rightlightpickables = [],  leftlightpickables = [],  rightdoorpickables = [],  leftdoorpickables = [],  windowdoorpickables = [],  windowlightpickables = [],  camerapickables = [],
   rightmappickables = [],  leftmappickables = [];
 var rotationy = 0,  viewpoint = 1;var Time, usage = 1,  power = 360;
-var roomlight;
 var quickswitch = 0,  switchflag = 0;
 var test = new THREE.Vector3(0, 0, 0);
 var breturndegree = new THREE.Vector3(0, 0, 0);
 var returndegree = new THREE.Vector3(10, 0, 0);
 var tablet, tabletbody, fliptheta = 0,  pickup = 0;
-var hudmap, outcameraflag = 0, car;
+var hudmap, outcameraflag = 0, car, Rcar;
+var dininglight, stagelight, kitchenlight, storeroomlight, restroomlight, counterlight, roomlight;
+var Rdininglight, Rstagelight, Rkitchenlight, Rstoreroomlight, Rrestroomlight, Rcounterlight, Rroomlight;
 
 init();
 animate();
@@ -70,48 +75,96 @@ function init() {
   document.body.appendChild(renderer.domElement);
 
   camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 2000);
-  camera.position.z = 10;
+  camera.position.z = -500;
   camera.position.y = 1000;
+  camera.lookAt(0, 40, -540);
+
+  camera2 = new THREE.PerspectiveCamera(50,100/50,1,2000);
+  camera2.position.z = -500;
+  camera2.position.y = 1000;
+  camera2.lookAt(0, 40, -540);
+
+  sceneRTT = new THREE.Scene();
   
+  renderTarget = new THREE.WebGLRenderTarget(
+    1024, 1024, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.NearestFilter,
+      format: THREE.RGBFormat
+    }
+  );
+
+
+
+	let screenplane = new THREE.PlaneBufferGeometry(100, 50);
+  let quad = new THREE.Mesh(screenplane,
+    new THREE.MeshBasicMaterial({
+     map: renderTarget.texture,
+      side: THREE.DoubleSide
+    }));
+  scene.add(quad);
+
+  quad.position.set(0,60,-89);
+
   
 
   cameraHUD = new THREE.OrthographicCamera(-10, 10, 10, -10, -10, 1600);
   cameraHUD.position.z = 1580;
 
-  sceneHUD = new THREE.Scene();
+  //sceneHUD = new THREE.Scene();
   //camera.lookAt(0,200,-100);
   //////////////////OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOrbit here////////////////////////////////////
-  let controls = new THREE.OrbitControls(camera, renderer.domElement);
+  let controls = new OrbitControls(camera, renderer.domElement);
 
   ////////////////////////////////////////////////////////////////
   //var gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
   //scene.add(gridXZ);
-	var dininglight = new THREE.PointLight(0xffffff, 1, 300);
+	dininglight = new THREE.PointLight(0xffffff, 1, 0);               /////300
   dininglight.position.set(-150, 100, -650);
   scene.add(dininglight);
+  Rdininglight = new THREE.PointLight(0xffffff, 1, 0);             /////300
+  Rdininglight.position.set(-150, 100, -650);
+  sceneRTT.add(Rdininglight);
+  
 
-  var stagelight = new THREE.PointLight(0xffffff, 1, 200);
+  stagelight = new THREE.PointLight(0xffffff, 1, 200);
   stagelight.position.set(-50, 100, -1000);
   scene.add(stagelight);
+  Rstagelight = new THREE.PointLight(0xffffff, 1, 200);
+  Rstagelight.position.set(-50, 100, -1000);
+  sceneRTT.add(Rstagelight);
   
-  var kitchenlight = new THREE.PointLight(0xffffff, 1, 220);
+  kitchenlight = new THREE.PointLight(0xffffff, 1, 220);
   kitchenlight.position.set(-650, 100, -750);
   scene.add(kitchenlight);
+  Rkitchenlight = new THREE.PointLight(0xffffff, 1, 220);
+  Rkitchenlight.position.set(-650, 100, -750);
+  sceneRTT.add(Rkitchenlight);
 
-  var storeroomlight = new THREE.PointLight(0xffffff, 1, 150);
+  storeroomlight = new THREE.PointLight(0xffffff, 1, 150);
   storeroomlight.position.set(-480, 100, -460);
   scene.add(storeroomlight);
+  Rstoreroomlight = new THREE.PointLight(0xffffff, 1, 150);
+  Rstoreroomlight.position.set(-480, 100, -460);
+  sceneRTT.add(Rstoreroomlight);
 
-  var restroomlight = new THREE.PointLight(0xffffff, 1, 140);
+  restroomlight = new THREE.PointLight(0xffffff, 1, 140);
   restroomlight.position.set(250, 100, -500);
   scene.add(restroomlight);
+  Rrestroomlight = new THREE.PointLight(0xffffff, 1, 140);
+  Rrestroomlight.position.set(250, 100, -500);
+  sceneRTT.add(Rrestroomlight);
 
-  var counterlight = new THREE.PointLight(0xffffff, 1, 140);
+  counterlight = new THREE.PointLight(0xffffff, 1, 140);
   counterlight.position.set(370, 100, -820);
   scene.add(counterlight);
+  Rcounterlight = new THREE.PointLight(0xffffff, 1, 140);
+  Rcounterlight.position.set(370, 100, -820);
+  sceneRTT.add(Rcounterlight);
 
   ///////////////////////////////////////////////////////  floor
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/DrvlmNW.jpg');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/DrvlmNW.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/woodenfloor.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -119,40 +172,67 @@ function init() {
 
   var geometry = new THREE.PlaneGeometry(205, 205, 32);
   var plane = new THREE.Mesh(geometry, texMat);
-  scene.add(plane);
   plane.rotation.x = -Math.PI / 2;
+  scene.add(plane);
+  var Rplane = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rplane);
+  Rplane.rotation.x = -Math.PI / 2;
   /////////////////////////////////////////   light
-  roomlight = new THREE.PointLight(0xffffff, 1, 150);
-  roomlight.position.set(0, 50, 0);
+  roomlight = new THREE.PointLight(0xffffff, 1, 0);         
+  roomlight.position.set(0, 50, 0);                     /////150
   scene.add(roomlight);
+  Rroomlight = new THREE.PointLight(0xffffff, 1, 0);
+  Rroomlight.position.set(0, 50, 0);                    /////150
+  sceneRTT.add(Rroomlight);
   /////right light
   light1 = new THREE.PointLight(0xffffff, 1, 65);
   light1.position.set(150, 50, -20);
   scene.add(light1);
+  Rlight1 = new THREE.PointLight(0xffffff, 1, 65);
+  Rlight1.position.set(150, 50, -20);
+  sceneRTT.add(Rlight1);
 
   light11 = new THREE.PointLight(0xffffff, 1, 65);
   light11.position.set(150, 50, -140);
   scene.add(light11);
+  Rlight11 = new THREE.PointLight(0xffffff, 1, 65);
+  Rlight11.position.set(150, 50, -140);
+  sceneRTT.add(Rlight11);
 
   light12 = new THREE.PointLight(0xffffff, 1, 65);
   light12.position.set(150, 50, -260);
   scene.add(light12);
+  Rlight12 = new THREE.PointLight(0xffffff, 1, 65);
+  Rlight12.position.set(150, 50, -260);
+  sceneRTT.add(Rlight12);
   /////left light
   light2 = new THREE.PointLight(0xffffff, 1, 65);
   light2.position.set(-150, 50, -20);
   scene.add(light2);
+  Rlight2 = new THREE.PointLight(0xffffff, 1, 65);
+  Rlight2.position.set(-150, 50, -20);
+  sceneRTT.add(Rlight2);
 
   light21 = new THREE.PointLight(0xffffff, 1, 65);
   light21.position.set(-150, 50, -140);
   scene.add(light21);
+  Rlight21 = new THREE.PointLight(0xffffff, 1, 65);
+  Rlight21.position.set(-150, 50, -140);
+  sceneRTT.add(Rlight21);
 
   light22 = new THREE.PointLight(0xffffff, 1, 65);
   light22.position.set(-150, 50, -260);
   scene.add(light22);
+  Rlight22 = new THREE.PointLight(0xffffff, 1, 65);
+  Rlight22.position.set(-150, 50, -260);
+  sceneRTT.add(Rlight22);
   /////window light
   light3 = new THREE.PointLight(0xffffff, 1, 1);
   light3.position.set(0, wallheight + windowsize / 2 + windowsize / 2 - 6, 100 + 25 / 2 + 5);
   scene.add(light3);
+  Rlight3 = new THREE.PointLight(0xffffff, 1, 1);
+  Rlight3.position.set(0, wallheight + windowsize / 2 + windowsize / 2 - 6, 100 + 25 / 2 + 5);
+  sceneRTT.add(Rlight3);
 
   /////////////////////////////////////////////////////////////////
   /*var testlight = new THREE.PointLight(0xffffff, 1 , 2000);
@@ -162,23 +242,32 @@ function init() {
 
 
   var geometry = new THREE.BoxGeometry(200, wallheight , 5);
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/iU1gtzm.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/iU1gtzm.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall01.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   var initwall1 = new THREE.Mesh(geometry, texMat);
-  scene.add(initwall1);
   initwall1.position.set(0, wallheight / 2 , 100);
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/L6OkHzh.png');
+  scene.add(initwall1);
+  var Rinitwall1 = new THREE.Mesh(geometry, texMat);
+  Rinitwall1.position.set(0, wallheight / 2 , 100);
+  sceneRTT.add(Rinitwall1);
+  
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/L6OkHzh.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall02.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   var initwall2 = new THREE.Mesh(geometry, texMat);
-  scene.add(initwall2);
   initwall2.position.set(0, wallheight / 2 - 10, -100);
+  scene.add(initwall2);
+  var Rinitwall2 = new THREE.Mesh(geometry, texMat);
+  Rinitwall2.position.set(0, wallheight / 2 - 10, -100);
+  sceneRTT.add(Rinitwall2);
 
   // set door size
   var doorsize = 30;
@@ -198,7 +287,7 @@ function init() {
   ////view point
   document.addEventListener('mousemove', onDocumentMouseMove, false);
   //set camera to look front
-  camera.lookAt(0, 40, -100);
+
 
 
   /////outside
@@ -215,7 +304,6 @@ function init() {
 
   ///test OBJ
   
-  car = new THREE.Group();
   //                modelname size  x   y   z  rotationx  y  z 
             readModel('plant', 40, 80, 20, 80, 0, 0, 0);
             readModel('plant', 40, -80, 20, 80, 0, 0.2, 0);
@@ -229,8 +317,24 @@ function init() {
             readModel('box', 30, -564, 15, -385, 0, -0.7, 0);
             readModel('Door_01', 100, -388, 50, -526, -Math.PI/2, 0, 0.4);
             readModel('Table_01', 80, 0, 16.5, 75, -Math.PI/2, 0, 0);
-            scene.add(car);
-  
+
+
+            RTTreadModel('plant', 40, 80, 20, 80, 0, 0, 0);
+            RTTreadModel('plant', 40, -80, 20, 80, 0, 0.2, 0);
+            RTTreadModel('Fridge', 70, -550, 35, -935, -Math.PI/2, 0, 0);
+            RTTreadModel('Fridge', 70, -580, 35, -935, -Math.PI/2, 0, 0);
+            RTTreadModel('Fridge', 70, -610, 35, -935, -Math.PI/2, 0, 0);
+            RTTreadModel('528 Bucket', 20, -580, 8.1, -525, 0, 0, 0);
+            RTTreadModel('Broom', 50, -584, 25, -505, 0, 0, 0);
+            RTTreadModel('Empty box', 50, -564, 12, -455, 0, 0, 0);
+            RTTreadModel('Empty box', 50, -564, 42, -385, 0, 0.7, 0);
+            RTTreadModel('box', 30, -564, 15, -385, 0, -0.7, 0);
+            RTTreadModel('Door_01', 100, -388, 50, -526, -Math.PI/2, 0, 0.4);
+            RTTreadModel('Table_01', 80, 0, 16.5, 75, -Math.PI/2, 0, 0);
+
+
+
+
 
 	/*
   camera.position.x = -120;
@@ -239,7 +343,8 @@ function init() {
   camera.lookAt(-140,10,-50);
   */
   
-  renderer.autoClear = false;
+  //renderer.autoClear = false;
+  window.addEventListener('resize', onWindowResize, false);
 
   //document.addEventListener("keydown", onDocumentKeyDown, false);
 
@@ -248,19 +353,26 @@ function init() {
 function animate() {
 	  	
   requestAnimationFrame(animate);
-  render();
+  //render();
   //camerarotation(rotationy);
-  windowflashing();
+  //windowflashing();
   //rightflashing();
   //leftflashing();
-  
+  renderer.setClearColor(0x888800);
+  renderer.setRenderTarget (renderTarget);
+  renderer.render(sceneRTT, camera2);
+	renderer.setRenderTarget (null);
+  // render texture to screne
+  renderer.setClearColor(0x888888);
+  renderer.render(scene, camera);
+  //renderer.render(sceneHUD, cameraHUD);
   
 }
 
 function render() {
   renderer.clear(true);
   renderer.render(scene, camera);
-  renderer.render(sceneHUD, cameraHUD);
+  //renderer.render(sceneHUD, cameraHUD);
 }
 
 function windowflashing() {
@@ -366,8 +478,8 @@ function leftflashing() {
 
 function maketable() {
 
-
-	var texture = new THREE.TextureLoader().load('https://i.imgur.com/S1ilknr.png');
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/S1ilknr.png');
+  else var texture = new THREE.TextureLoader().load('/tex/white.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -380,34 +492,50 @@ function maketable() {
 
   var geometry = new THREE.BoxGeometry(100, 50, 10 );
   var monitor = new THREE.Mesh(geometry, texMat);
-  scene.add(monitor);
   monitor.position.set(0, 60, -95);
+  scene.add(monitor);
+  
+  var Rmonitor = new THREE.Mesh(geometry, texMat);
+  Rmonitor.position.set(0, 60, -95);
+  sceneRTT.add(Rmonitor);
   
   
   var geometry = new THREE.BoxGeometry(30, 30, 5 );
   var monitor2 = new THREE.Mesh(geometry, texMat);
-  scene.add(monitor2);
   monitor2.position.set(70, 50, -70);
   monitor2.rotation.y -= Math.PI/4;
+  scene.add(monitor2);
+
+  var Rmonitor2 = new THREE.Mesh(geometry, texMat);
+  Rmonitor2.position.set(70, 50, -70);
+  Rmonitor2.rotation.y -= Math.PI/4;
+  sceneRTT.add(Rmonitor2);
+
   
   
   var geometry = new THREE.BoxGeometry(30, 20, 5 );
   var monitor3 = new THREE.Mesh(geometry, texMat);
-  scene.add(monitor3);
   monitor3.position.set(-70, 45, -75);
   monitor3.rotation.y += Math.PI/4 ;
+  scene.add(monitor3);
+
+  var Rmonitor3 = new THREE.Mesh(geometry, texMat);
+  Rmonitor3.position.set(-70, 45, -75);
+  Rmonitor3.rotation.y += Math.PI/4 ;
+  sceneRTT.add(Rmonitor3);
   
   
   
   
-  
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/pZgBo3R.jpg');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/pZgBo3R.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/controlpanel01.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
-  var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+  if(Islocal != 1) var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+  var texture2 = new THREE.TextureLoader().load('/tex/controlpanel02.jpg');
 
   var texMat2 = new THREE.MeshPhongMaterial({
     map: texture2
@@ -463,8 +591,13 @@ function maketable() {
 
   
   var table = new THREE.Mesh(geometry, texMat);
-  scene.add(table);
   table.position.set(0, 0, -70);
+  scene.add(table);
+
+  var Rtable = new THREE.Mesh(geometry, texMat);
+  Rtable.position.set(0, 0, -70);
+  sceneRTT.add(Rtable);
+
 
 	geometry = new THREE.Geometry();
   
@@ -515,6 +648,9 @@ function maketable() {
   
 	var table2 = new THREE.Mesh(geometry, texMat);
   scene.add(table2);
+
+  var Rtable2 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rtable2);
 
 	geometry = new THREE.Geometry();
 
@@ -567,6 +703,9 @@ function maketable() {
   
   var table3 = new THREE.Mesh(geometry, texMat2);
   scene.add(table3);
+
+  var Rtable3 = new THREE.Mesh(geometry, texMat2);
+  sceneRTT.add(Rtable3);
 	
   geometry = new THREE.Geometry();
 
@@ -619,6 +758,9 @@ function maketable() {
   
   var table4 = new THREE.Mesh(geometry, texMat2);
   scene.add(table4);
+
+  var Rtable4 = new THREE.Mesh(geometry, texMat2);
+  sceneRTT.add(Rtable4);
 	
   
   geometry = new THREE.Geometry();
@@ -673,6 +815,8 @@ function maketable() {
   var table5 = new THREE.Mesh(geometry, texMat);
   scene.add(table5);
   
+  var Rtable5 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rtable5);
   
   
   geometry = new THREE.Geometry();
@@ -700,6 +844,9 @@ function maketable() {
   
   var table6 = new THREE.Mesh(geometry, texMat);
   scene.add(table6);
+
+  var Rtable6 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rtable6);
   
   
   geometry = new THREE.Geometry();
@@ -728,6 +875,10 @@ function maketable() {
   var table7 = new THREE.Mesh(geometry, texMat);
   scene.add(table7);
 
+  var Rtable7 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rtable7);
+
+
 
 
 
@@ -747,53 +898,79 @@ function makewall(Dsize, wallheight) {
   */
 	var geometry = new THREE.BoxGeometry(5, wallheight ,100);
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/nwTSw4l.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/nwTSw4l.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall03.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   var rightwall = new THREE.Mesh(geometry, texMat);
-  scene.add(rightwall);
   rightwall.position.set(100, wallheight / 2 - 10, 50);
+  scene.add(rightwall);
+
+  var Rrightwall = new THREE.Mesh(geometry, texMat);
+  Rrightwall.position.set(100, wallheight / 2 - 10, 50);
+  sceneRTT.add(Rrightwall);
+ 
   
   var geometry = new THREE.BoxGeometry(5, wallheight ,100);
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/gIqf5Lb.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/gIqf5Lb.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall04.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   var leftwall = new THREE.Mesh(geometry, texMat);
-  scene.add(leftwall);
   leftwall.position.set(-100, wallheight / 2 - 10, 50);
+  scene.add(leftwall);
+
+  var Rleftwall = new THREE.Mesh(geometry, texMat);
+  Rleftwall.position.set(-100, wallheight / 2 - 10, 50);
+  sceneRTT.add(Rleftwall);
+
 
   
   var geometry = new THREE.BoxGeometry(5, wallheight, 100 - Dsize);
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/2nQfXeF.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/2nQfXeF.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall05.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   var rightwall2 = new THREE.Mesh(geometry, texMat);
-  scene.add(rightwall2);
   rightwall2.position.set(100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2);
+  scene.add(rightwall2);
+
+  var Rrightwall2 = new THREE.Mesh(geometry, texMat);
+  Rrightwall2.position.set(100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2);
+  sceneRTT.add(Rrightwall2);
+
+
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/7FI95WC.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/7FI95WC.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall06.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   var leftwall2 = new THREE.Mesh(geometry, texMat);
-  scene.add(leftwall2);
   leftwall2.position.set(-100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2);
+  scene.add(leftwall2);
+
+  var Rleftwall2 = new THREE.Mesh(geometry, texMat);
+  Rleftwall2.position.set(-100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2);
+  sceneRTT.add(Rleftwall2);
+
 
   ///////////////////////////door//////////////////////////
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/awWOSCI.jpg');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/awWOSCI.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/door.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -808,12 +985,20 @@ function makewall(Dsize, wallheight) {
   leftdoor.position.set(-100, wallheight / 2, -1 * Dsize / 2);
   scene.add(leftdoor);
 
+  Rrightdoor = new THREE.Mesh(geometry, texMat);
+  Rrightdoor.position.set(100, wallheight / 2, -1 * Dsize / 2);
+  sceneRTT.add(Rrightdoor);
+  Rleftdoor = new THREE.Mesh(geometry, texMat);
+  Rleftdoor.position.set(-100, wallheight / 2, -1 * Dsize / 2);
+  sceneRTT.add(Rleftdoor);
+
 }
 ///////////////////////////////////////////////////////////////////
 function makewindow(wallheight, windowsize) {
 	
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/pzdqvl6.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/pzdqvl6.png');
+  else var texture = new THREE.TextureLoader().load('/tex/vent.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -821,9 +1006,12 @@ function makewindow(wallheight, windowsize) {
 
   var geometry = new THREE.BoxGeometry(windowsize, windowsize, 5);
   windowdoor = new THREE.Mesh(geometry, texMat);
-
   windowdoor.position.set(0, wallheight + windowsize / 2, 100 - 0.01)
   scene.add(windowdoor);
+
+  Rwindowdoor = new THREE.Mesh(geometry, texMat);
+  Rwindowdoor.position.set(0, wallheight + windowsize / 2, 100 - 0.01)
+  sceneRTT.add(Rwindowdoor);
 
 
   ///////////////front walls///////////////////
@@ -833,113 +1021,178 @@ function makewindow(wallheight, windowsize) {
     side: THREE.DoubleSide
   });
   //front
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/w20eRrs.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/w20eRrs.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall07.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   var walls1 = new THREE.Mesh(geometry, texMat);
-  scene.add(walls1);
   walls1.position.set(0, wallheight + windowsize / 2, -100);
+  scene.add(walls1);
+
+  var Rwalls1 = new THREE.Mesh(geometry, texMat);
+  Rwalls1.position.set(0, wallheight + windowsize / 2, -100);
+  sceneRTT.add(Rwalls1);
+
   ///////////////right and left walls///////////////////
   var geometry = new THREE.BoxGeometry(5, windowsize + 20, 200);
   //right
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/6rpZyxp.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/6rpZyxp.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall08.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
 
   var walls2 = new THREE.Mesh(geometry, texMat);
-  scene.add(walls2);
   walls2.position.set(100, wallheight + windowsize / 2, 0);
+  scene.add(walls2);
+
+  var Rwalls2 = new THREE.Mesh(geometry, texMat);
+  Rwalls2.position.set(100, wallheight + windowsize / 2, 0);
+  sceneRTT.add(Rwalls2);
+
   //left
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/CaIo9vS.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/CaIo9vS.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall09.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   var walls3 = new THREE.Mesh(geometry, texMat);
-  scene.add(walls3);
   walls3.position.set(-100, wallheight + windowsize / 2, 0);
+  scene.add(walls3);
+
+  var Rwalls3 = new THREE.Mesh(geometry, texMat);
+  Rwalls3.position.set(-100, wallheight + windowsize / 2, 0);
+  sceneRTT.add(Rwalls3);
+
 
   ///////////////right and left walls///////////////////
   var geometry = new THREE.BoxGeometry((200 - windowsize) / 2, windowsize, 5);
   //back left
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/BWZ4az3.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/BWZ4az3.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall10.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   var walls4 = new THREE.Mesh(geometry, texMat);
-  scene.add(walls4);
   walls4.position.set(windowsize / 2 + (200 - windowsize) / 2 / 2, wallheight + windowsize / 2, 100);
+  scene.add(walls4);
+
+  var Rwalls4 = new THREE.Mesh(geometry, texMat);
+  Rwalls4.position.set(windowsize / 2 + (200 - windowsize) / 2 / 2, wallheight + windowsize / 2, 100);
+  sceneRTT.add(Rwalls4);
+
   //back right
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/1aG8ivb.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/1aG8ivb.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall11.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   var walls5 = new THREE.Mesh(geometry, texMat);
-  scene.add(walls5);
   walls5.position.set(-(windowsize / 2 + (200 - windowsize) / 2 / 2), wallheight + windowsize / 2, 100);
+  scene.add(walls5);
 
+  var Rwalls5 = new THREE.Mesh(geometry, texMat);
+  Rwalls5.position.set(-(windowsize / 2 + (200 - windowsize) / 2 / 2), wallheight + windowsize / 2, 100);
+  sceneRTT.add(Rwalls5);
 
 
   var geometry = new THREE.BoxGeometry(2, windowsize, 80);
 
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/ZUWRF8R.jpg');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/ZUWRF8R.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/ventinside.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
 
   var windows1 = new THREE.Mesh(geometry, texMat);
-  scene.add(windows1);
   windows1.position.set(windowsize / 2 - 1, wallheight + windowsize / 2, 100 + 40 - 2.5)
+  scene.add(windows1);
+
+  var Rwindows1 = new THREE.Mesh(geometry, texMat);
+  Rwindows1.position.set(windowsize / 2 - 1, wallheight + windowsize / 2, 100 + 40 - 2.5)
+  sceneRTT.add(Rwindows1);
+
 
   var windows2 = new THREE.Mesh(geometry, texMat);
-  scene.add(windows2);
   windows2.position.set(-windowsize / 2 + 1, wallheight + windowsize / 2, 100 + 40 - 2.5)
+  scene.add(windows2);
+
+  var Rwindows2 = new THREE.Mesh(geometry, texMat);
+  Rwindows2.position.set(-windowsize / 2 + 1, wallheight + windowsize / 2, 100 + 40 - 2.5)
+  sceneRTT.add(Rwindows2);
 
   var geometry = new THREE.BoxGeometry(windowsize - 4, 2, 40);
 
   var windows3 = new THREE.Mesh(geometry, texMat);
-  scene.add(windows3);
   windows3.position.set(0, wallheight + windowsize / 2 + windowsize / 2 - 1, 100 + 20 - 2.5)
+  scene.add(windows3);
+
+  var Rwindows3 = new THREE.Mesh(geometry, texMat);
+  Rwindows3.position.set(0, wallheight + windowsize / 2 + windowsize / 2 - 1, 100 + 20 - 2.5)
+  sceneRTT.add(Rwindows3);
 
   var geometry = new THREE.BoxGeometry(windowsize - 4, 2, 80);
 
   var windows4 = new THREE.Mesh(geometry, texMat);
-  scene.add(windows4);
   windows4.position.set(0, wallheight + windowsize / 2 - windowsize / 2 + 1, 100 + 40 - 2.5)
+  scene.add(windows4);
+
+  var Rwindows4 = new THREE.Mesh(geometry, texMat);
+  Rwindows4.position.set(0, wallheight + windowsize / 2 - windowsize / 2 + 1, 100 + 40 - 2.5)
+  sceneRTT.add(Rwindows4);
 
   var geometry = new THREE.BoxGeometry(40, 80, 2);
 
   var windows5 = new THREE.Mesh(geometry, texMat);
-  scene.add(windows5);
   windows5.position.set(0, wallheight + windowsize / 2 - windowsize / 2 + 40, 100 + 80 - 2.5)
+  scene.add(windows5);
 
+  var Rwindows5 = new THREE.Mesh(geometry, texMat);
+  Rwindows5.position.set(0, wallheight + windowsize / 2 - windowsize / 2 + 40, 100 + 80 - 2.5)
+  sceneRTT.add(Rwindows5);
 
   var geometry = new THREE.BoxGeometry(2, 40, 40);
 
   var windows6 = new THREE.Mesh(geometry, texMat);
-  scene.add(windows6);
   windows6.position.set(20 - 1, wallheight + windowsize / 2 - windowsize / 2 + 60, 100 + 60 - 2.5)
+  scene.add(windows6);
+
+  var Rwindows6 = new THREE.Mesh(geometry, texMat);
+  Rwindows6.position.set(20 - 1, wallheight + windowsize / 2 - windowsize / 2 + 60, 100 + 60 - 2.5)
+  sceneRTT.add(Rwindows6);
 
   var windows7 = new THREE.Mesh(geometry, texMat);
-  scene.add(windows7);
   windows7.position.set(-20 + 1, wallheight + windowsize / 2 - windowsize / 2 + 60, 100 + 60 - 2.5)
+  scene.add(windows7);
+
+  var Rwindows7 = new THREE.Mesh(geometry, texMat);
+  Rwindows7.position.set(-20 + 1, wallheight + windowsize / 2 - windowsize / 2 + 60, 100 + 60 - 2.5)
+  sceneRTT.add(Rwindows7);
+
 
   var windowlightbox = new THREE.Mesh(new THREE.BoxGeometry(8, 3, 25), new THREE.MeshPhongMaterial({
     color: 0xffffff
   }))
-  scene.add(windowlightbox);
   windowlightbox.position.set(0, wallheight + windowsize / 2 + windowsize / 2 - 3, 100 + 25 / 2 + 5)
+  scene.add(windowlightbox);
+
+  var Rwindowlightbox = new THREE.Mesh(new THREE.BoxGeometry(8, 3, 25), new THREE.MeshPhongMaterial({
+    color: 0xffffff
+  }))
+  Rwindowlightbox.position.set(0, wallheight + windowsize / 2 + windowsize / 2 - 3, 100 + 25 / 2 + 5)
+  sceneRTT.add(Rwindowlightbox);
+
 }
 
 function openrightdoor() {
@@ -1175,8 +1428,10 @@ function camerarotation(x) {
 
 
 function makeoutside() {
+  var loader = new THREE.TextureLoader();
 
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/FM8caZz.jpg');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/FM8caZz.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/outsidefloor.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1185,18 +1440,21 @@ function makeoutside() {
 
   var geometry = new THREE.PlaneGeometry(405, 450, 32);
   var corridor = new THREE.Mesh(geometry, texMat);
-  scene.add(corridor);
   corridor.rotation.x = -Math.PI / 2;
   corridor.position.y = -0.1;
   corridor.position.z = -125;
+  scene.add(corridor);
+
+  var Rcorridor = new THREE.Mesh(geometry, texMat);
+  Rcorridor.rotation.x = -Math.PI / 2;
+  Rcorridor.position.y = -0.1;
+  Rcorridor.position.z = -125;
+  sceneRTT.add(Rcorridor);
 
 
 
-
-  var loader = new THREE.TextureLoader()
-  loader.crossOrigin = '';
-
-  texture = loader.load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = loader.load('https://i.imgur.com/G634HPV.png');
+  else texture = loader.load('/tex/wall12.png');
 
   texture.repeat.set(1.5, 1);
   texture.wrapS = THREE.RepeatWrapping;
@@ -1206,8 +1464,15 @@ function makeoutside() {
     new THREE.MeshPhongMaterial({
       map: texture
     }))
-  scene.add(outwalls1);
   outwalls1.position.set(-200, 50, -50)
+  scene.add(outwalls1);
+
+  var Routwalls1 = new THREE.Mesh(new THREE.BoxGeometry(10, 100, 300),
+    new THREE.MeshPhongMaterial({
+      map: texture
+    }))
+  Routwalls1.position.set(-200, 50, -50)
+  sceneRTT.add(Routwalls1);
 
 
 
@@ -1216,11 +1481,20 @@ function makeoutside() {
     new THREE.MeshPhongMaterial({
       map: texture
     }))
-  scene.add(outwalls2);
   outwalls2.position.set(200, 50, -50)
+  scene.add(outwalls2);
+
+  var Routwalls2 = new THREE.Mesh(new THREE.BoxGeometry(10, 100, 300),
+    new THREE.MeshPhongMaterial({
+      map: texture
+    }))
+  Routwalls2.position.set(200, 50, -50)
+  sceneRTT.add(Routwalls2);
+
 
 	
-  var texture = loader.load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) var texture = loader.load('https://i.imgur.com/G634HPV.png');
+  else texture = loader.load('/tex/wall12.png');
 
   texture.repeat.set(1, 1);
   texture.wrapS = THREE.RepeatWrapping;
@@ -1231,10 +1505,19 @@ function makeoutside() {
     new THREE.MeshPhongMaterial({
       map: texture
     }))
-  scene.add(outwalls3);
   outwalls3.position.set(0, 50, -200)
+  scene.add(outwalls3);
+
+  var Routwalls3 = new THREE.Mesh(new THREE.BoxGeometry(209.9, 100, 0),
+    new THREE.MeshPhongMaterial({
+      map: texture
+    }))
+  Routwalls3.position.set(0, 50, -200)
+  sceneRTT.add(Routwalls3);
+
   
-  var texture = loader.load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) var texture = loader.load('https://i.imgur.com/G634HPV.png');
+  else texture = loader.load('/tex/wall12.png');
 
   texture.repeat.set(0.75, 1);
   texture.wrapS = THREE.RepeatWrapping;
@@ -1244,38 +1527,68 @@ function makeoutside() {
     new THREE.MeshPhongMaterial({
       map: texture
     }))
-  scene.add(outwalls4);
   outwalls4.position.set(-200, 50, -277.4)
+  scene.add(outwalls4);
+
+  var Routwalls4 = new THREE.Mesh(new THREE.BoxGeometry(10, 100, 155),
+    new THREE.MeshPhongMaterial({
+      map: texture
+    }))
+  Routwalls4.position.set(-200, 50, -277.4)
+  sceneRTT.add(Routwalls4);
 
 
   var outwalls5 = new THREE.Mesh(new THREE.BoxGeometry(10, 100, 155),
     new THREE.MeshPhongMaterial({
       map: texture
     }))
-  scene.add(outwalls5);
   outwalls5.position.set(200, 50, -277.4)
-  
+  scene.add(outwalls5);
+
+  var Routwalls5 = new THREE.Mesh(new THREE.BoxGeometry(10, 100, 155),
+    new THREE.MeshPhongMaterial({
+      map: texture
+    }))
+  Routwalls5.position.set(200, 50, -277.4)
+  sceneRTT.add(Routwalls5);
+
   
   var outwalls7 = new THREE.Mesh(new THREE.BoxGeometry(10, 100, 150),
     new THREE.MeshPhongMaterial({
       map: texture
     }))
-  scene.add(outwalls7);
   outwalls7.position.set(-100, 50, -275)
+  scene.add(outwalls7);
+
+  var Routwalls7 = new THREE.Mesh(new THREE.BoxGeometry(10, 100, 150),
+    new THREE.MeshPhongMaterial({
+      map: texture
+    }))
+  Routwalls7.position.set(-100, 50, -275)
+  sceneRTT.add(Routwalls7);
 
 
   var outwalls8 = new THREE.Mesh(new THREE.BoxGeometry(10, 100, 150),
     new THREE.MeshPhongMaterial({
       map: texture
     }))
-  scene.add(outwalls8);
   outwalls8.position.set(100, 50, -275)
+  scene.add(outwalls8);
+
+  var Routwalls8 = new THREE.Mesh(new THREE.BoxGeometry(10, 100, 150),
+    new THREE.MeshPhongMaterial({
+      map: texture
+    }))
+  Routwalls8.position.set(100, 50, -275)
+  sceneRTT.add(Routwalls8);
 
 }
 
 function makediningroom(){
+  var loader = new THREE.TextureLoader();
 
-	var texture = new THREE.TextureLoader().load('https://i.imgur.com/mdXDao3.png');
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/mdXDao3.png');
+  else var texture = new THREE.TextureLoader().load('/tex/diningfloor.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1288,14 +1601,22 @@ function makediningroom(){
   
   var geometry = new THREE.PlaneGeometry(1000, 600);
   var diningfloor = new THREE.Mesh(geometry, texMat);
-  scene.add(diningfloor);
   diningfloor.rotation.x = -Math.PI / 2;
   diningfloor.position.y = -0.05;
   diningfloor.position.z = -650;
+  scene.add(diningfloor);
+
+  var Rdiningfloor = new THREE.Mesh(geometry, texMat);
+  Rdiningfloor.rotation.x = -Math.PI / 2;
+  Rdiningfloor.position.y = -0.05;
+  Rdiningfloor.position.z = -650;
+  sceneRTT.add(Rdiningfloor);
+
   
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1305,13 +1626,21 @@ function makediningroom(){
 	
   var geometry = new THREE.BoxGeometry(409.9, 100, 10);
   var frontwall1 = new THREE.Mesh(geometry, texMat);
-  scene.add(frontwall1);
   frontwall1.position.x = -400;
   frontwall1.position.y = 50;
   frontwall1.position.z = -350;
+  scene.add(frontwall1);
+
+  var Rfrontwall1 = new THREE.Mesh(geometry, texMat);
+  Rfrontwall1.position.x = -400;
+  Rfrontwall1.position.y = 50;
+  Rfrontwall1.position.z = -350;
+  sceneRTT.add(Rfrontwall1);
+
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1321,12 +1650,20 @@ function makediningroom(){
   
   var geometry = new THREE.BoxGeometry(309.9, 100, 10);
   var frontwall2 = new THREE.Mesh(geometry, texMat);
-  scene.add(frontwall2);
   frontwall2.position.x = 350;
   frontwall2.position.y = 50;
   frontwall2.position.z = -350;
+  scene.add(frontwall2);
+
+  var Rfrontwall2 = new THREE.Mesh(geometry, texMat);
+  Rfrontwall2.position.x = 350;
+  Rfrontwall2.position.y = 50;
+  Rfrontwall2.position.z = -350;
+  sceneRTT.add(Rfrontwall2);
+
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1336,13 +1673,21 @@ function makediningroom(){
   
   var geometry = new THREE.BoxGeometry(209.9, 100, 10);
   var frontwall3 = new THREE.Mesh(geometry, texMat);
-  scene.add(frontwall3);
   frontwall3.position.x = 0;
   frontwall3.position.y = 50;
   frontwall3.position.z = -350;
+  scene.add(frontwall3);
+
+  var Rfrontwall3 = new THREE.Mesh(geometry, texMat);
+  Rfrontwall3.position.x = 0;
+  Rfrontwall3.position.y = 50;
+  Rfrontwall3.position.z = -350;
+  sceneRTT.add(Rfrontwall3);
+
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1352,12 +1697,20 @@ function makediningroom(){
   
   var geometry = new THREE.BoxGeometry(300, 100, 10);
   var leftbackwall = new THREE.Mesh(geometry, texMat);
-  scene.add(leftbackwall);
   leftbackwall.position.x =  -350;
   leftbackwall.position.y =  50;
   leftbackwall.position.z = -950;
+  scene.add(leftbackwall);
+
+  var Rleftbackwall = new THREE.Mesh(geometry, texMat);
+  Rleftbackwall.position.x =  -350;
+  Rleftbackwall.position.y =  50;
+  Rleftbackwall.position.z = -950;
+  sceneRTT.add(Rleftbackwall);
+
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1367,13 +1720,21 @@ function makediningroom(){
   
   var geometry = new THREE.BoxGeometry(400, 100, 10);
   var rightbackwall = new THREE.Mesh(geometry, texMat);
-  scene.add(rightbackwall);
   rightbackwall.position.x =  300;
   rightbackwall.position.y =  50;
   rightbackwall.position.z = -950;
+  scene.add(rightbackwall);
+
+  var Rrightbackwall = new THREE.Mesh(geometry, texMat);
+  Rrightbackwall.position.x =  300;
+  Rrightbackwall.position.y =  50;
+  Rrightbackwall.position.z = -950;
+  sceneRTT.add(Rrightbackwall);
+
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1383,12 +1744,20 @@ function makediningroom(){
   
   var geometry = new THREE.BoxGeometry(10, 100, 600);
   var rightwall = new THREE.Mesh(geometry, texMat);
-  scene.add(rightwall);
   rightwall.position.x = 500;
   rightwall.position.y = 50;
   rightwall.position.z = -650;
+  scene.add(rightwall);
+
+  var Rrightwall = new THREE.Mesh(geometry, texMat);
+  Rrightwall.position.x = 500;
+  Rrightwall.position.y = 50;
+  Rrightwall.position.z = -650;
+  sceneRTT.add(Rrightwall);
+
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1398,12 +1767,20 @@ function makediningroom(){
   
   var geometry = new THREE.BoxGeometry(10, 100, 100);
   var frontleftwall = new THREE.Mesh(geometry, texMat);
-  scene.add(frontleftwall);
   frontleftwall.position.x = -500;
   frontleftwall.position.y = 50;
   frontleftwall.position.z = -600;
+  scene.add(frontleftwall);
+
+  var Rfrontleftwall = new THREE.Mesh(geometry, texMat);
+  Rfrontleftwall.position.x = -500;
+  Rfrontleftwall.position.y = 50;
+  Rfrontleftwall.position.z = -600;
+  sceneRTT.add(Rfrontleftwall);
+
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1413,14 +1790,20 @@ function makediningroom(){
   
   var geometry = new THREE.BoxGeometry(10, 100, 60);
   var middleleftwall = new THREE.Mesh(geometry, texMat);
-  scene.add(middleleftwall);
   middleleftwall.position.x = -500;
   middleleftwall.position.y = 50;
   middleleftwall.position.z = -805;
+  scene.add(middleleftwall);
+
+  var Rmiddleleftwall = new THREE.Mesh(geometry, texMat);
+  Rmiddleleftwall.position.x = -500;
+  Rmiddleleftwall.position.y = 50;
+  Rmiddleleftwall.position.z = -805;
+  sceneRTT.add(Rmiddleleftwall);
   
   
-  
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1430,13 +1813,21 @@ function makediningroom(){
   
   var geometry = new THREE.BoxGeometry(10, 100, 50);
   var backleftwall = new THREE.Mesh(geometry, texMat);
-  scene.add(backleftwall);
   backleftwall.position.x = -500;
   backleftwall.position.y = 50;
   backleftwall.position.z = -925;
+  scene.add(backleftwall);
+
+  var Rbackleftwall = new THREE.Mesh(geometry, texMat);
+  Rbackleftwall.position.x = -500;
+  Rbackleftwall.position.y = 50;
+  Rbackleftwall.position.z = -925;
+  sceneRTT.add(Rbackleftwall);
+
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1446,13 +1837,21 @@ function makediningroom(){
   
   var geometry = new THREE.PlaneGeometry(10, 100);
   var backleftwallh = new THREE.Mesh(geometry, texMat);
-  scene.add(backleftwallh);
   backleftwallh.position.x = -500;
   backleftwallh.position.y = 50;
   backleftwallh.position.z = -899.9;
+  scene.add(backleftwallh);
+
+  var Rbackleftwallh = new THREE.Mesh(geometry, texMat);
+  Rbackleftwallh.position.x = -500;
+  Rbackleftwallh.position.y = 50;
+  Rbackleftwallh.position.z = -899.9;
+  sceneRTT.add(Rbackleftwallh);
+
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1462,11 +1861,19 @@ function makediningroom(){
   
   var geometry = new THREE.PlaneGeometry(10, 100);
   var middleleftwall = new THREE.Mesh(geometry, texMat);
-  scene.add(middleleftwall);
   middleleftwall.position.x = -500;
   middleleftwall.position.y = 50;
   middleleftwall.position.z = -835.1;
   middleleftwall.rotation.y = Math.PI;
+  scene.add(middleleftwall);
+
+  var Rmiddleleftwall = new THREE.Mesh(geometry, texMat);
+  Rmiddleleftwall.position.x = -500;
+  Rmiddleleftwall.position.y = 50;
+  Rmiddleleftwall.position.z = -835.1;
+  Rmiddleleftwall.rotation.y = Math.PI;
+  sceneRTT.add(Rmiddleleftwall);
+
   
   
   
@@ -1516,8 +1923,11 @@ function makediningroom(){
 }
 
 function stage(x,z){
-	texture = new THREE.TextureLoader().load('https://i.imgur.com/0swWBqB.jpg');
-  texMat = new THREE.MeshPhongMaterial({
+  var loader = new THREE.TextureLoader();
+  
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/0swWBqB.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/stage.jpg');
+  var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
@@ -1531,6 +1941,13 @@ function stage(x,z){
   stage1.position.x = x;
   stage1.position.y = 20;
   stage1.position.z = z;
+
+  var Rstage1 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rstage1);
+  Rstage1.position.x = x;
+  Rstage1.position.y = 20;
+  Rstage1.position.z = z;
+
   
   var geometry = new THREE.BoxGeometry(50, 10, 10);
   var leftstage1 = new THREE.Mesh(geometry, texMat);
@@ -1539,12 +1956,29 @@ function stage(x,z){
   leftstage1.position.y = -15;
   leftstage1.position.z = 15;
   stage1.add(leftstage1);
+
+  var Rleftstage1 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rleftstage1);
+  Rleftstage1.position.x = -125;
+  Rleftstage1.position.y = -15;
+  Rleftstage1.position.z = 15;
+  Rstage1.add(Rleftstage1);
+
+
   var rightstage1 = new THREE.Mesh(geometry, texMat);
   scene.add(rightstage1);
   rightstage1.position.x = 125;
   rightstage1.position.y = -15;
   rightstage1.position.z = 15;
   stage1.add(rightstage1);
+
+  var Rrightstage1 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rrightstage1);
+  Rrightstage1.position.x = 125;
+  Rrightstage1.position.y = -15;
+  Rrightstage1.position.z = 15;
+  Rstage1.add(Rrightstage1);
+
   
   var geometry = new THREE.BoxGeometry(50, 10, 10);
   var leftstage2 = new THREE.Mesh(geometry, texMat);
@@ -1553,12 +1987,29 @@ function stage(x,z){
   leftstage2.position.y = -5;
   leftstage2.position.z = 5;
   stage1.add(leftstage2);
+
+  var Rleftstage2 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rleftstage2);
+  Rleftstage2.position.x = -125;
+  Rleftstage2.position.y = -5;
+  Rleftstage2.position.z = 5;
+  Rstage1.add(Rleftstage2);
+
+
   var rightstage2 = new THREE.Mesh(geometry, texMat);
   scene.add(rightstage2);
   rightstage2.position.x = 125;
   rightstage2.position.y = -5;
   rightstage2.position.z = 5;
   stage1.add(rightstage2);
+
+  var Rrightstage2 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rrightstage2);
+  Rrightstage2.position.x = 125;
+  Rrightstage2.position.y = -5;
+  Rrightstage2.position.z = 5;
+  Rstage1.add(Rrightstage2);
+
   
   var geometry = new THREE.BoxGeometry(50, 10, 10);
   var leftstage3 = new THREE.Mesh(geometry, texMat);
@@ -1567,12 +2018,29 @@ function stage(x,z){
   leftstage3.position.y = 5;
   leftstage3.position.z = -5;
   stage1.add(leftstage3);
+
+  var Rleftstage3 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rleftstage3);
+  Rleftstage3.position.x = -125;
+  Rleftstage3.position.y = 5;
+  Rleftstage3.position.z = -5;
+  Rstage1.add(Rleftstage3);
+
+
   var rightstage3 = new THREE.Mesh(geometry, texMat);
   scene.add(rightstage3);
   rightstage3.position.x = 125;
   rightstage3.position.y = 5;
   rightstage3.position.z = -5;
   stage1.add(rightstage3);
+
+  var Rrightstage3 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rrightstage3);
+  Rrightstage3.position.x = 125;
+  Rrightstage3.position.y = 5;
+  Rrightstage3.position.z = -5;
+  Rstage1.add(Rrightstage3);
+
   
   var geometry = new THREE.BoxGeometry(50, 10, 10);
   var leftstage4 = new THREE.Mesh(geometry, texMat);
@@ -1581,21 +2049,44 @@ function stage(x,z){
   leftstage4.position.y = 15;
   leftstage4.position.z = -15;
   stage1.add(leftstage4);
+  
+  var Rleftstage4 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rleftstage4);
+  Rleftstage4.position.x = -125;
+  Rleftstage4.position.y = 15;
+  Rleftstage4.position.z = -15;
+  Rstage1.add(Rleftstage4);
+
+
   var rightstage4 = new THREE.Mesh(geometry, texMat);
   scene.add(rightstage4);
   rightstage4.position.x = 125;
   rightstage4.position.y = 15;
   rightstage4.position.z = -15;
   stage1.add(rightstage4);
+
+  var Rrightstage4 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rrightstage4);
+  Rrightstage4.position.x = 125;
+  Rrightstage4.position.y = 15;
+  Rrightstage4.position.z = -15;
+  Rstage1.add(Rrightstage4);
+
   
   var geometry = new THREE.BoxGeometry(300, 40, 200);
   var stageflat = new THREE.Mesh(geometry, texMat);
   scene.add(stageflat);
   stageflat.position.z = -120;
   stage1.add(stageflat);
+
+  var Rstageflat = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rstageflat);
+  Rstageflat.position.z = -120;
+  Rstage1.add(Rstageflat);
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/0swWBqB.jpg');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/0swWBqB.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/stage.jpg');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1610,6 +2101,12 @@ function stage(x,z){
   backwall.position.z = -220;
   backwall.position.y = 30;
   stage1.add(backwall);
+
+  var Rbackwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbackwall);
+  Rbackwall.position.z = -220;
+  Rbackwall.position.y = 30;
+  Rstage1.add(Rbackwall);
   
   
   var geometry = new THREE.BoxGeometry(10, 100, 240);
@@ -1619,6 +2116,14 @@ function stage(x,z){
   leftwall.position.y = 30;
   leftwall.position.x = -150;
   stage1.add(leftwall);
+
+  var Rleftwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rleftwall);
+  Rleftwall.position.z = -95;
+  Rleftwall.position.y = 30;
+  Rleftwall.position.x = -150;
+  Rstage1.add(Rleftwall);
+
   
   var rightwall = new THREE.Mesh(geometry, texMat);
   scene.add(rightwall);
@@ -1626,33 +2131,46 @@ function stage(x,z){
   rightwall.position.y = 30;
   rightwall.position.x = 150;
   stage1.add(rightwall);
+
+  var Rrightwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rrightwall);
+  Rrightwall.position.z = -95;
+  Rrightwall.position.y = 30;
+  Rrightwall.position.x = 150;
+  Rstage1.add(Rrightwall);
 }
 
 function tables(x,z,R){
-	var texture = new THREE.TextureLoader().load('https://i.imgur.com/beiOFVd.png');
+  var loader = new THREE.TextureLoader();
+
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/beiOFVd.png');
+  else var texture = new THREE.TextureLoader().load('/tex/table01.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
-  var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+  if(Islocal != 1) var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+  else var texture2 = new THREE.TextureLoader().load('/tex/table02.jpg');
 
   var texMat2 = new THREE.MeshPhongMaterial({
     map: texture2
   });
   
-  var texture3 = new THREE.TextureLoader().load('https://i.imgur.com/I9NueiU.jpg');
+  if(Islocal != 1) var texture3 = new THREE.TextureLoader().load('https://i.imgur.com/I9NueiU.jpg');
+  else var texture3 = new THREE.TextureLoader().load('/tex/table03.jpg');
 
   var texMat3 = new THREE.MeshPhongMaterial({
     map: texture3
   });
   
-  
-  var loader = new THREE.TextureLoader();
-  loader.setCrossOrigin('');
-  tex = loader.load('https://i.imgur.com/beiOFVd.png');
-  alpha2 = loader.load('https://i.imgur.com/KKaGud6.png');
-	alpha = loader.load('https://i.imgur.com/gcqu2PW.png')
+  //loader.setCrossOrigin('');
+  if(Islocal != 1) var tex = loader.load('https://i.imgur.com/beiOFVd.png');
+  else var tex = loader.load('/tex/table01.png');
+  if(Islocal != 1) var alpha2 = loader.load('https://i.imgur.com/KKaGud6.png');
+  else var alpha2 = loader.load('/tex/table04.png');
+	if(Islocal != 1) var alpha = loader.load('https://i.imgur.com/gcqu2PW.png')
+  else var alpha = loader.load('/tex/table05.png');
   
   
   
@@ -1660,8 +2178,13 @@ function tables(x,z,R){
 
 	var geometry = new THREE.BoxGeometry(50, 3, 25);
   var table = new THREE.Mesh(geometry, texMat);
-  scene.add(table);
   table.position.y = 25;
+  scene.add(table);
+
+  var Rtable = new THREE.Mesh(geometry, texMat);
+  Rtable.position.y = 25;
+  sceneRTT.add(Rtable);
+
   
   var table1 = new THREE.Mesh(new THREE.PlaneGeometry(50, 20), new THREE.MeshPhongMaterial({
     map: tex,
@@ -1674,6 +2197,19 @@ function tables(x,z,R){
   table.add(table1);
   table1.position.z = 12.51;
   table1.position.y = -8.5;  
+
+  var Rtable1 = new THREE.Mesh(new THREE.PlaneGeometry(50, 20), new THREE.MeshPhongMaterial({
+    map: tex,
+    alphaMap:alpha,
+    transparent: true,
+    side: THREE.DoubleSide
+  }));
+
+  sceneRTT.add(Rtable1);
+  Rtable.add(Rtable1);
+  Rtable1.position.z = 12.51;
+  Rtable1.position.y = -8.5;  
+
   
   var table2 = new THREE.Mesh(new THREE.PlaneGeometry(50, 20), new THREE.MeshPhongMaterial({
     map: tex,
@@ -1686,6 +2222,19 @@ function tables(x,z,R){
   table.add(table2);
   table2.position.z = -12.51;
   table2.position.y = -8.5;  
+
+  var Rtable2 = new THREE.Mesh(new THREE.PlaneGeometry(50, 20), new THREE.MeshPhongMaterial({
+    map: tex,
+    alphaMap:alpha,
+    transparent: true,
+    side: THREE.DoubleSide
+  }));
+
+  sceneRTT.add(Rtable2);
+  Rtable.add(Rtable2);
+  Rtable2.position.z = -12.51;
+  Rtable2.position.y = -8.5;  
+
   
   var table3 = new THREE.Mesh(new THREE.PlaneGeometry(25.02, 20), new THREE.MeshPhongMaterial({
     map: tex,
@@ -1699,6 +2248,19 @@ function tables(x,z,R){
   table3.position.x = 25.01;
   table3.position.y = -8.5;  
   table3.rotation.y += Math.PI/2;
+
+  var Rtable3 = new THREE.Mesh(new THREE.PlaneGeometry(25.02, 20), new THREE.MeshPhongMaterial({
+    map: tex,
+    alphaMap:alpha2,
+    transparent: true,
+    side: THREE.DoubleSide
+  }));
+
+  sceneRTT.add(Rtable3);
+  Rtable.add(Rtable3);
+  Rtable3.position.x = 25.01;
+  Rtable3.position.y = -8.5;  
+  Rtable3.rotation.y += Math.PI/2;
   
   
   var table4 = new THREE.Mesh(new THREE.PlaneGeometry(25.02, 20), new THREE.MeshPhongMaterial({
@@ -1714,6 +2276,19 @@ function tables(x,z,R){
   table4.position.y = -8.5;  
   table4.rotation.y += Math.PI/2;
 
+  var Rtable4 = new THREE.Mesh(new THREE.PlaneGeometry(25.02, 20), new THREE.MeshPhongMaterial({
+    map: tex,
+    alphaMap:alpha2,
+    transparent: true,
+    side: THREE.DoubleSide
+  }));
+
+  sceneRTT.add(Rtable4);
+  Rtable.add(Rtable4);
+  Rtable4.position.x = -25.01;
+  Rtable4.position.y = -8.5;  
+  Rtable4.rotation.y += Math.PI/2;
+
   
   
   
@@ -1723,6 +2298,12 @@ function tables(x,z,R){
   cylinder.position.y = -12.5;
   
   table.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -12.5;
+  
+  Rtable.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 3, 12, 4, 32 );
@@ -1734,6 +2315,16 @@ function tables(x,z,R){
   
   table.position.x = x;
   table.position.z = z;
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = - 22.5;
+  
+  Rtable.add(Rcylinder);
+  
+  Rtable.position.x = x;
+  Rtable.position.z = z;
+
   
   
   var geometry = new THREE.CylinderGeometry( 8, 8, 3, 32 );
@@ -1743,12 +2334,25 @@ function tables(x,z,R){
   chair1.position.x = -12.5;
   chair1.position.y = -8;
   table.add(chair1);
+
+  var Rchair1 = new THREE.Mesh( geometry, texMat3 );
+	sceneRTT.add( Rchair1 );
+  Rchair1.position.z = -25;
+  Rchair1.position.x = -12.5;
+  Rchair1.position.y = -8;
+  Rtable.add(Rchair1);
+
   
   var geometry = new THREE.CylinderGeometry( 1.5, 1.5, 20, 32 );
 	var cylinder = new THREE.Mesh( geometry, texMat2 );
 	scene.add( cylinder );
   cylinder.position.y = -10;
   chair1.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -10;
+  Rchair1.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 1.5, 5, 2, 32 );
@@ -1756,6 +2360,11 @@ function tables(x,z,R){
 	scene.add( cylinder );
   cylinder.position.y = -15.5;
   chair1.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -15.5;
+  Rchair1.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 8, 8, 3, 32 );
@@ -1765,12 +2374,25 @@ function tables(x,z,R){
   chair2.position.x = 12.5;
   chair2.position.y = -8;
   table.add(chair2);
+
+  var Rchair2 = new THREE.Mesh( geometry, texMat3 );
+	sceneRTT.add( Rchair2 );
+  Rchair2.position.z = -25;
+  Rchair2.position.x = 12.5;
+  Rchair2.position.y = -8;
+  Rtable.add(Rchair2);
+
   
   var geometry = new THREE.CylinderGeometry( 1.5, 1.5, 20, 32 );
 	var cylinder = new THREE.Mesh( geometry, texMat2 );
 	scene.add( cylinder );
   cylinder.position.y = -10;
   chair2.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -10;
+  Rchair2.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 1.5, 5, 2, 32 );
@@ -1778,6 +2400,12 @@ function tables(x,z,R){
 	scene.add( cylinder );
   cylinder.position.y = -15.5;
   chair2.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -15.5;
+  Rchair2.add(Rcylinder);
+
   
   var geometry = new THREE.CylinderGeometry( 8, 8, 3, 32 );
 	var chair3 = new THREE.Mesh( geometry, texMat3 );
@@ -1786,12 +2414,25 @@ function tables(x,z,R){
   chair3.position.x = -12.5;
   chair3.position.y = -8;
   table.add(chair3);
+
+  var Rchair3 = new THREE.Mesh( geometry, texMat3 );
+	sceneRTT.add( Rchair3 );
+  Rchair3.position.z = 25;
+  Rchair3.position.x = -12.5;
+  Rchair3.position.y = -8;
+  Rtable.add(Rchair3);
+
   
   var geometry = new THREE.CylinderGeometry( 1.5, 1.5, 20, 32 );
 	var cylinder = new THREE.Mesh( geometry, texMat2 );
 	scene.add( cylinder );
   cylinder.position.y = -10;
   chair3.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -10;
+  Rchair3.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 1.5, 5, 2, 32 );
@@ -1799,6 +2440,12 @@ function tables(x,z,R){
 	scene.add( cylinder );
   cylinder.position.y = -15.5;
   chair3.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -15.5;
+  Rchair3.add(Rcylinder);
+
   
   var geometry = new THREE.CylinderGeometry( 8, 8, 3, 32 );
 	var chair4 = new THREE.Mesh( geometry, texMat3 );
@@ -1807,12 +2454,25 @@ function tables(x,z,R){
   chair4.position.x = 12.5;
   chair4.position.y = -8;
   table.add(chair4);
+
+  var Rchair4 = new THREE.Mesh( geometry, texMat3 );
+	sceneRTT.add( Rchair4 );
+  Rchair4.position.z = 25;
+  Rchair4.position.x = 12.5;
+  Rchair4.position.y = -8;
+  Rtable.add(Rchair4);
+
   
   var geometry = new THREE.CylinderGeometry( 1.5, 1.5, 20, 32 );
 	var cylinder = new THREE.Mesh( geometry, texMat2 );
 	scene.add( cylinder );
   cylinder.position.y = -10;
   chair4.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -10;
+  Rchair4.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 1.5, 5, 2, 32 );
@@ -1820,24 +2480,35 @@ function tables(x,z,R){
 	scene.add( cylinder );
   cylinder.position.y = -15.5;
   chair4.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -15.5;
+  Rchair4.add(Rcylinder);
   
   if(R == 1) table.rotation.y += Math.PI/2;
+  if(R == 1) Rtable.rotation.y += Math.PI/2;
 }
 
 function counter(x,z){
-	var texture = new THREE.TextureLoader().load('https://i.imgur.com/O3szElw.jpg');
+  var loader = new THREE.TextureLoader();
+
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/O3szElw.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/counter01.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
-  var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+  if(Islocal != 1) var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+  else var texture2 = new THREE.TextureLoader().load('/tex/counter02.jpg');
 
   var texMat2 = new THREE.MeshPhongMaterial({
     map: texture2
   });
   
-  var texture3 = new THREE.TextureLoader().load('https://i.imgur.com/I9NueiU.jpg');
+  if(Islocal != 1) var texture3 = new THREE.TextureLoader().load('https://i.imgur.com/I9NueiU.jpg');
+  else var texture3 = new THREE.TextureLoader().load('/tex/counter03.jpg');
 
   var texMat3 = new THREE.MeshPhongMaterial({
     map: texture3
@@ -1849,6 +2520,13 @@ function counter(x,z){
   counter.position.x = x;
   counter.position.z = z;
   counter.position.y = 20;
+
+  var Rcounter = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rcounter);
+  Rcounter.position.x = x;
+  Rcounter.position.z = z;
+  Rcounter.position.y = 20;
+
   
   var geometry = new THREE.BoxGeometry(15, 5, 150);
   var box = new THREE.Mesh(geometry, texMat);
@@ -1856,6 +2534,12 @@ function counter(x,z){
   counter.add(box);
   box.position.x = 15;
   box.position.y = 5;
+
+  var Rbox = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox);
+  Rcounter.add(Rbox);
+  Rbox.position.x = 15;
+  Rbox.position.y = 5;
   
   
   var geometry = new THREE.BoxGeometry(130, 40, 15);
@@ -1864,6 +2548,12 @@ function counter(x,z){
   counter.add(box);
   box.position.z = 82.5;
   box.position.x = 57.5;
+
+  var Rbox = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox);
+  Rcounter.add(Rbox);
+  Rbox.position.z = 82.5;
+  Rbox.position.x = 57.5;
   
   
   var geometry = new THREE.CylinderGeometry( 8, 8, 3, 32 );
@@ -1873,12 +2563,25 @@ function counter(x,z){
   chair1.position.x = 50;
   chair1.position.y = -3;
   counter.add(chair1);
+
+  var Rchair1 = new THREE.Mesh( geometry, texMat3 );
+	sceneRTT.add( Rchair1 );
+  Rchair1.position.z = -25;
+  Rchair1.position.x = 50;
+  Rchair1.position.y = -3;
+  Rcounter.add(Rchair1);
+
   
   var geometry = new THREE.CylinderGeometry( 1.5, 1.5, 20, 32 );
 	var cylinder = new THREE.Mesh( geometry, texMat2 );
 	scene.add( cylinder );
   cylinder.position.y = -10;
   chair1.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -10;
+  Rchair1.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 1.5, 5, 2, 32 );
@@ -1886,6 +2589,11 @@ function counter(x,z){
 	scene.add( cylinder );
   cylinder.position.y = -15.5;
   chair1.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -15.5;
+  Rchair1.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 8, 8, 3, 32 );
@@ -1895,12 +2603,25 @@ function counter(x,z){
   chair2.position.x = 50;
   chair2.position.y = -3;
   counter.add(chair2);
+
+  var Rchair2 = new THREE.Mesh( geometry, texMat3 );
+	sceneRTT.add( Rchair2 );
+  Rchair2.position.z = 25;
+  Rchair2.position.x = 50;
+  Rchair2.position.y = -3;
+  Rcounter.add(Rchair2);
+
   
   var geometry = new THREE.CylinderGeometry( 1.5, 1.5, 20, 32 );
 	var cylinder = new THREE.Mesh( geometry, texMat2 );
 	scene.add( cylinder );
   cylinder.position.y = -10;
   chair2.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -10;
+  Rchair2.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 1.5, 5, 2, 32 );
@@ -1909,11 +2630,15 @@ function counter(x,z){
   cylinder.position.y = -15.5;
   chair2.add(cylinder);
 
-
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -15.5;
+  Rchair2.add(Rcylinder);
 }
 
 function restroom(x,z){
-	var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1924,8 +2649,16 @@ function restroom(x,z){
   backwall.position.y = 50;
   backwall.position.x = x;
   backwall.position.z = z;
+
+  var Rbackwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbackwall);
+  Rbackwall.position.y = 50;
+  Rbackwall.position.x = x;
+  Rbackwall.position.z = z;
+
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1941,6 +2674,13 @@ function restroom(x,z){
   backwall.add(fleftwall);
   fleftwall.position.x = -100;
   fleftwall.position.z = 50;
+
+  var Rfleftwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rfleftwall);
+  Rbackwall.add(Rfleftwall);
+  Rfleftwall.position.x = -100;
+  Rfleftwall.position.z = 50;
+
   
   var geometry = new THREE.BoxGeometry(10, 100, 109.9);
   var bleftwall = new THREE.Mesh(geometry, texMat);
@@ -1948,6 +2688,13 @@ function restroom(x,z){
   backwall.add(bleftwall);
   bleftwall.position.x = -100;
   bleftwall.position.z = 250;
+
+  var Rbleftwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbleftwall);
+  Rbackwall.add(Rbleftwall);
+  Rbleftwall.position.x = -100;
+  Rbleftwall.position.z = 250;
+
   
   var geometry = new THREE.BoxGeometry(10, 100, 109.9);
   var ileftwall = new THREE.Mesh(geometry, texMat);
@@ -1955,9 +2702,16 @@ function restroom(x,z){
   backwall.add(ileftwall);
   ileftwall.position.x = -50;
   ileftwall.position.z = 150;
+
+  var Rileftwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rileftwall);
+  Rbackwall.add(Rileftwall);
+  Rileftwall.position.x = -50;
+  Rileftwall.position.z = 150;
   
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1974,6 +2728,13 @@ function restroom(x,z){
   backwall.add(fleftwallh);
   fleftwallh.position.x = -100;
   fleftwallh.position.z = 104.5;
+
+  var Rfleftwallh = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rfleftwallh);
+  Rbackwall.add(Rfleftwallh);
+  Rfleftwallh.position.x = -100;
+  Rfleftwallh.position.z = 104.5;
+
   
   var geometry = new THREE.BoxGeometry(9.9, 100);
   var bleftwallh = new THREE.Mesh(geometry, texMat);
@@ -1981,8 +2742,16 @@ function restroom(x,z){
   backwall.add(bleftwallh);
   bleftwallh.position.x = -100;
   bleftwallh.position.z = 195.5;
+
+  var Rbleftwallh = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbleftwallh);
+  Rbackwall.add(Rbleftwallh);
+  Rbleftwallh.position.x = -100;
+  Rbleftwallh.position.z = 195.5;
+
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1998,6 +2767,13 @@ function restroom(x,z){
   backwall.add(fdoorwall);
   fdoorwall.position.x = -75;
   fdoorwall.position.z = 95.6;
+
+  var Rfdoorwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rfdoorwall);
+  Rbackwall.add(Rfdoorwall);
+  Rfdoorwall.position.x = -75;
+  Rfdoorwall.position.z = 95.6;
+
   
   var geometry = new THREE.BoxGeometry(40, 100);
   var fdoorwall = new THREE.Mesh(geometry, texMat);
@@ -2005,8 +2781,16 @@ function restroom(x,z){
   backwall.add(fdoorwall);
   fdoorwall.position.x = -75;
   fdoorwall.position.z = 203.6;
+
+  var Rfdoorwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rfdoorwall);
+  Rbackwall.add(Rfdoorwall);
+  Rfdoorwall.position.x = -75;
+  Rfdoorwall.position.z = 203.6;
+
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/skdK9KX.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/skdK9KX.png');
+  else var texture = new THREE.TextureLoader().load('/tex/restroom01.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2019,9 +2803,17 @@ function restroom(x,z){
   rdm.position.x = -75;
   rdm.position.y = -10;
   rdm.position.z = 203.3;
+
+  var Rrdm = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rrdm);
+  Rbackwall.add(Rrdm);
+  Rrdm.position.x = -75;
+  Rrdm.position.y = -10;
+  Rrdm.position.z = 203.3;
   
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/MUaGcp3.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/MUaGcp3.png');
+  else var texture = new THREE.TextureLoader().load('/tex/restroom02.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2034,6 +2826,13 @@ function restroom(x,z){
   rdf.position.x = -75;
   rdf.position.y = -10;
   rdf.position.z = 96.08;
+
+  var Rrdf = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rrdf);
+  Rbackwall.add(Rrdf);
+  Rrdf.position.x = -75;
+  Rrdf.position.y = -10;
+  Rrdf.position.z = 96.08;
   
   
   
@@ -2046,7 +2845,8 @@ function restroom(x,z){
 }
 
 function makesink(x,z){
-	var texture = new THREE.TextureLoader().load('https://i.imgur.com/FM8caZz.jpg');
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/FM8caZz.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/sink01.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2058,6 +2858,13 @@ function makesink(x,z){
   sink.position.x = x;
   sink.position.y = 12.5;
   sink.position.z = z;
+
+  var Rsink = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rsink);
+  Rsink.position.x = x;
+  Rsink.position.y = 12.5;
+  Rsink.position.z = z;
+
   
   var geometry = new THREE.BoxGeometry(20, 30, 3 );
   var box = new THREE.Mesh(geometry, texMat);
@@ -2065,6 +2872,13 @@ function makesink(x,z){
   sink.add(box);
   box.position.y = 2.5;
   box.position.z = 24;
+
+  var Rbox = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox);
+  Rsink.add(Rbox);
+  Rbox.position.y = 2.5;
+  Rbox.position.z = 24;
+
   
   var geometry = new THREE.BoxGeometry(20, 30, 3 );
   var box = new THREE.Mesh(geometry, texMat);
@@ -2072,6 +2886,13 @@ function makesink(x,z){
   sink.add(box);
   box.position.y = 2.5;
   box.position.z = -24;
+
+  var Rbox = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox);
+  Rsink.add(Rbox);
+  Rbox.position.y = 2.5;
+  Rbox.position.z = -24;
+
   
   var geometry = new THREE.BoxGeometry(3, 30, 50 );
   var box = new THREE.Mesh(geometry, texMat);
@@ -2079,6 +2900,13 @@ function makesink(x,z){
   sink.add(box);
   box.position.y = 2.49;
   box.position.x = -8.51;
+
+  var Rbox = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox);
+  Rsink.add(Rbox);
+  Rbox.position.y = 2.49;
+  Rbox.position.x = -8.51;
+
   
   var geometry = new THREE.BoxGeometry(8, 30, 50.9 );
   var box = new THREE.Mesh(geometry, texMat);
@@ -2086,8 +2914,16 @@ function makesink(x,z){
   sink.add(box);
   box.position.y = 2.51;
   box.position.x = 11.01;
+
+  var Rbox = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox);
+  Rsink.add(Rbox);
+  Rbox.position.y = 2.51;
+  Rbox.position.x = 11.01;
+
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/KcLkzzZ.jpg');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/KcLkzzZ.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/sink02.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2100,6 +2936,13 @@ function makesink(x,z){
   torus.position.y = 25;
   torus.position.x = 5;
   sink.add(torus);
+
+  var Rtorus = new THREE.Mesh( geometry, texMat );
+	sceneRTT.add( Rtorus );
+  Rtorus.position.y = 25;
+  Rtorus.position.x = 5;
+  Rsink.add(Rtorus);
+
   
   var geometry = new THREE.CylinderGeometry( 1, 1, 10, 32 );
 	var cylinder = new THREE.Mesh( geometry, texMat );
@@ -2107,10 +2950,17 @@ function makesink(x,z){
   cylinder.position.y = 20;
   cylinder.position.x = 10;
   sink.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = 20;
+  Rcylinder.position.x = 10;
+  Rsink.add(Rcylinder);
 }
 
 function storeroom(x,z){
-	var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2127,6 +2977,12 @@ function storeroom(x,z){
   storewall.position.y = 50;
   storewall.position.x = x;
   storewall.position.z = z;
+
+  var Rstorewall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rstorewall);
+  Rstorewall.position.y = 50;
+  Rstorewall.position.x = x;
+  Rstorewall.position.z = z;
   
   
   var geometry = new THREE.BoxGeometry(10, 100, 130);
@@ -2135,8 +2991,15 @@ function storeroom(x,z){
   storewall.add(storewall2);
   storewall2.position.x = 65;
   storewall2.position.z = 135;
+
+  var Rstorewall2 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rstorewall2);
+  Rstorewall.add(Rstorewall2);
+  Rstorewall2.position.x = 65;
+  Rstorewall2.position.z = 135;
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2152,9 +3015,16 @@ function storeroom(x,z){
   storewall.add(storewall3);
   storewall3.position.x = 65;
   storewall3.position.z = 2.5;
+
+  var Rstorewall3 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rstorewall3);
+  Rstorewall.add(Rstorewall3);
+  Rstorewall3.position.x = 65;
+  Rstorewall3.position.z = 2.5;
   
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2170,9 +3040,16 @@ function storeroom(x,z){
   storewall.add(leftstorewall);
   leftstorewall.position.x = -165;
   leftstorewall.position.z = 100;
+
+  var Rleftstorewall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rleftstorewall);
+  Rstorewall.add(Rleftstorewall);
+  Rleftstorewall.position.x = -165;
+  Rleftstorewall.position.z = 100;
   
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2188,6 +3065,12 @@ function storeroom(x,z){
   storewall2.add(storewall2h);
   storewall2h.position.z = -65.1;
   storewall2h.rotation.y += Math.PI;
+
+  var Rstorewall2h = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rstorewall2h);
+  Rstorewall2.add(Rstorewall2h);
+  Rstorewall2h.position.z = -65.1;
+  Rstorewall2h.rotation.y += Math.PI;
   
   /*
   var texture = new THREE.TextureLoader().load('https://i.imgur.com/eNW4WXs.png');
@@ -2228,7 +3111,9 @@ function storeroom(x,z){
   storedoorh2.position.z = -27.52;
   storedoorh2.rotation.y += Math.PI; 
   */
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/mdXDao3.png');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/mdXDao3.png');
+  else var texture = new THREE.TextureLoader().load('/tex/diningfloor.png');
+
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2249,25 +3134,37 @@ function storeroom(x,z){
   
   storewall.add(storefloor);
 
+  var Rstorefloor = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rstorefloor);
+  Rstorefloor.rotation.x = -Math.PI / 2;
+  Rstorefloor.position.x = -105.1;
+  Rstorefloor.position.y = -50;
+  Rstorefloor.position.z = 100;
+  
+  Rstorewall.add(Rstorefloor);
+
   storeroomtables(-400,-368);
   storeroomtables(-450,-368);
   
 }
 
 function storeroomtables(x,z){
-	var texture = new THREE.TextureLoader().load('https://i.imgur.com/beiOFVd.png');
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/beiOFVd.png');
+  else var texture = new THREE.TextureLoader().load('/tex/table01.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
-  var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+  if(Islocal != 1) var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+  else var texture2 = new THREE.TextureLoader().load('/tex/table02.jpg');
 
   var texMat2 = new THREE.MeshPhongMaterial({
     map: texture2
   });
   
-  var texture3 = new THREE.TextureLoader().load('https://i.imgur.com/I9NueiU.jpg');
+  if(Islocal != 1) var texture3 = new THREE.TextureLoader().load('https://i.imgur.com/I9NueiU.jpg');
+  else var texture3 = new THREE.TextureLoader().load('/tex/table03.jpg');
 
   var texMat3 = new THREE.MeshPhongMaterial({
     map: texture3
@@ -2280,6 +3177,10 @@ function storeroomtables(x,z){
   var table = new THREE.Mesh(geometry, texMat);
   scene.add(table);
   table.position.y = 25;
+
+  var Rtable = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rtable);
+  Rtable.position.y = 25;
   
   
   
@@ -2289,6 +3190,12 @@ function storeroomtables(x,z){
   cylinder.position.y = -12.5;
   
   table.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -12.5;
+  
+  Rtable.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 3, 12, 4, 32 );
@@ -2300,6 +3207,15 @@ function storeroomtables(x,z){
   
   table.position.x = x;
   table.position.z = z;
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = - 23;
+  
+  Rtable.add(Rcylinder);
+  
+  Rtable.position.x = x;
+  Rtable.position.z = z;
   
   
   var geometry = new THREE.CylinderGeometry( 8, 8, 3, 32 );
@@ -2309,12 +3225,25 @@ function storeroomtables(x,z){
   chair1.position.x = -12.5;
   chair1.position.y = -8;
   table.add(chair1);
+
+  var Rchair1 = new THREE.Mesh( geometry, texMat3 );
+	sceneRTT.add( Rchair1 );
+  Rchair1.position.z = -25;
+  Rchair1.position.x = -12.5;
+  Rchair1.position.y = -8;
+  Rtable.add(Rchair1);
+
   
   var geometry = new THREE.CylinderGeometry( 1.5, 1.5, 15, 32 );
 	var cylinder = new THREE.Mesh( geometry, texMat2 );
 	scene.add( cylinder );
   cylinder.position.y = -7.5;
   chair1.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -7.5;
+  Rchair1.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 1.5, 5, 2, 32 );
@@ -2322,6 +3251,11 @@ function storeroomtables(x,z){
 	scene.add( cylinder );
   cylinder.position.y = -16;
   chair1.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -16;
+  Rchair1.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 8, 8, 3, 32 );
@@ -2331,12 +3265,25 @@ function storeroomtables(x,z){
   chair2.position.x = 12.5;
   chair2.position.y = -8;
   table.add(chair2);
+
+  var Rchair2 = new THREE.Mesh( geometry, texMat3 );
+	sceneRTT.add( Rchair2 );
+  Rchair2.position.z = -25;
+  Rchair2.position.x = 12.5;
+  Rchair2.position.y = -8;
+  Rtable.add(Rchair2);
+
   
   var geometry = new THREE.CylinderGeometry( 1.5, 1.5, 15, 32 );
 	var cylinder = new THREE.Mesh( geometry, texMat2 );
 	scene.add( cylinder );
   cylinder.position.y = -7.5;
   chair2.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -7.5;
+  Rchair2.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 1.5, 5, 2, 32 );
@@ -2344,6 +3291,12 @@ function storeroomtables(x,z){
 	scene.add( cylinder );
   cylinder.position.y = -16;
   chair2.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -16;
+  Rchair2.add(Rcylinder);
+
   
   var geometry = new THREE.CylinderGeometry( 8, 8, 3, 32 );
 	var chair3 = new THREE.Mesh( geometry, texMat3 );
@@ -2352,12 +3305,25 @@ function storeroomtables(x,z){
   chair3.position.x = -12.5;
   chair3.position.y = -8;
   table.add(chair3);
+
+  var Rchair3 = new THREE.Mesh( geometry, texMat3 );
+	sceneRTT.add( Rchair3 );
+  Rchair3.position.z = -45;
+  Rchair3.position.x = -12.5;
+  Rchair3.position.y = -8;
+  Rtable.add(Rchair3);
+
   
   var geometry = new THREE.CylinderGeometry( 1.5, 1.5, 15, 32 );
 	var cylinder = new THREE.Mesh( geometry, texMat2 );
 	scene.add( cylinder );
   cylinder.position.y = -7.5;
   chair3.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -7.5;
+  Rchair3.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 1.5, 5, 2, 32 );
@@ -2365,6 +3331,12 @@ function storeroomtables(x,z){
 	scene.add( cylinder );
   cylinder.position.y = -16;
   chair3.add(cylinder);
+
+	var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -16;
+  Rchair3.add(Rcylinder);
+
   
   var geometry = new THREE.CylinderGeometry( 8, 8, 3, 32 );
 	var chair4 = new THREE.Mesh( geometry, texMat3 );
@@ -2373,12 +3345,25 @@ function storeroomtables(x,z){
   chair4.position.x = 12.5;
   chair4.position.y = -8;
   table.add(chair4);
+
+  var Rchair4 = new THREE.Mesh( geometry, texMat3 );
+	sceneRTT.add( Rchair4 );
+  Rchair4.position.z = -45;
+  Rchair4.position.x = 12.5;
+  Rchair4.position.y = -8;
+  Rtable.add(Rchair4);
+
   
   var geometry = new THREE.CylinderGeometry( 1.5, 1.5, 15, 32 );
 	var cylinder = new THREE.Mesh( geometry, texMat2 );
 	scene.add( cylinder );
   cylinder.position.y = -7.5;
   chair4.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -7.5;
+  Rchair4.add(Rcylinder);
   
   
   var geometry = new THREE.CylinderGeometry( 1.5, 5, 2, 32 );
@@ -2386,12 +3371,19 @@ function storeroomtables(x,z){
 	scene.add( cylinder );
   cylinder.position.y = -16;
   chair4.add(cylinder);
+
+  var Rcylinder = new THREE.Mesh( geometry, texMat2 );
+	sceneRTT.add( Rcylinder );
+  Rcylinder.position.y = -16;
+  Rchair4.add(Rcylinder);
 	
 }
 
 function kitchen(x,z){
 
-	var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -2405,9 +3397,16 @@ function kitchen(x,z){
   backwall.position.z = z;
   backwall.position.y = 50;
   backwall.position.x = x;
+
+  var Rbackwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbackwall);
+  Rbackwall.position.z = z;
+  Rbackwall.position.y = 50;
+  Rbackwall.position.x = x;
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -2420,9 +3419,15 @@ function kitchen(x,z){
   scene.add(frontwall);
   frontwall.position.z = 400;
   backwall.add(frontwall);
+
+  var Rfrontwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rfrontwall);
+  Rfrontwall.position.z = 400;
+  Rbackwall.add(Rfrontwall);
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -2436,9 +3441,17 @@ function kitchen(x,z){
   frontleftwall.position.z = 250;
   frontleftwall.position.x = -150;
   backwall.add(frontleftwall);
+
+  var Rfrontleftwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rfrontleftwall);
+  Rfrontleftwall.position.z = 250;
+  Rfrontleftwall.position.x = -150;
+  Rbackwall.add(Rfrontleftwall);
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/As3Bhdi.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/As3Bhdi.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall13.png');
+
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -2451,10 +3464,18 @@ function kitchen(x,z){
   middleleftwall.position.x = -150;
   backwall.add(middleleftwall);
   
+  var Rmiddleleftwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rmiddleleftwall);
+  Rmiddleleftwall.position.z = 80;
+  Rmiddleleftwall.position.y = -20;
+  Rmiddleleftwall.position.x = -150;
+  Rbackwall.add(Rmiddleleftwall);
   
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -2468,10 +3489,17 @@ function kitchen(x,z){
   backleftwall.position.z = 30;
   backleftwall.position.x = -150;
   backwall.add(backleftwall);
+
+  var Rbackleftwall = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbackleftwall);
+  Rbackleftwall.position.z = 30;
+  Rbackleftwall.position.x = -150;
+  Rbackwall.add(Rbackleftwall);
   
   
   
-  var texture = new THREE.TextureLoader().load('https://i.imgur.com/ZUWRF8R.jpg');
+  if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/ZUWRF8R.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/ventinside.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2483,6 +3511,14 @@ function kitchen(x,z){
   windows1.position.z = 80;
   windows1.position.x = -185;
   backwall.add(windows1);
+
+  var Rwindows1 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rwindows1);
+  Rwindows1.position.y = 50;
+  Rwindows1.position.z = 80;
+  Rwindows1.position.x = -185;
+  Rbackwall.add(Rwindows1);
+
   
   var geometry = new THREE.BoxGeometry(80, 2, 40);
   var windows2 = new THREE.Mesh(geometry, texMat);
@@ -2491,6 +3527,13 @@ function kitchen(x,z){
   windows2.position.z = 80;
   windows2.position.x = -185;
   backwall.add(windows2);
+
+  var Rwindows2 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rwindows2);
+  Rwindows2.position.y = 10;
+  Rwindows2.position.z = 80;
+  Rwindows2.position.x = -185;
+  Rbackwall.add(Rwindows2);
   
   
   var geometry = new THREE.BoxGeometry(80, 38, 2);
@@ -2500,6 +3543,13 @@ function kitchen(x,z){
   windows3.position.z = 61;
   windows3.position.x = -185;
   backwall.add(windows3);
+
+  var Rwindows3 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rwindows3);
+  Rwindows3.position.y = 30;
+  Rwindows3.position.z = 61;
+  Rwindows3.position.x = -185;
+  Rbackwall.add(Rwindows3);
   
   
   var geometry = new THREE.BoxGeometry(80, 38, 2);
@@ -2509,10 +3559,18 @@ function kitchen(x,z){
   windows4.position.z = 99;
   windows4.position.x = -185;
   backwall.add(windows4);
+
+  var Rwindows4 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rwindows4);
+  Rwindows4.position.y = 30;
+  Rwindows4.position.z = 99;
+  Rwindows4.position.x = -185;
+  Rbackwall.add(Rwindows4);
   
 
 
-	texture = new THREE.TextureLoader().load('https://i.imgur.com/mdXDao3.png');
+	if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/mdXDao3.png');
+  else var texture = new THREE.TextureLoader().load('/tex/diningfloor.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2530,9 +3588,17 @@ function kitchen(x,z){
   kitchenfloor.rotation.x = -Math.PI / 2;
   kitchenfloor.position.y = -50;
   kitchenfloor.position.z = 192;
+
+  var Rkitchenfloor = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rkitchenfloor);
+  Rbackwall.add(Rkitchenfloor);
+  Rkitchenfloor.rotation.x = -Math.PI / 2;
+  Rkitchenfloor.position.y = -50;
+  Rkitchenfloor.position.z = 192;
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/kPmETQG.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/kPmETQG.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall14.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2549,9 +3615,17 @@ function kitchen(x,z){
   counter.position.y = -29.5;
   counter.position.x = 150;
   backwall.add(counter);
+
+  var Rcounter = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rcounter);
+  Rcounter.position.z = 237.5;
+  Rcounter.position.y = -29.5;
+  Rcounter.position.x = 150;
+  Rbackwall.add(Rcounter);
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/vDGQV3k.jpg');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/vDGQV3k.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/kitchen01.jpg');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2564,9 +3638,17 @@ function kitchen(x,z){
   counter2.position.y = -6;
   counter2.position.x = 150;
   backwall.add(counter2);
+
+  var Rcounter2 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rcounter2);
+  Rcounter2.position.z = 237.5;
+  Rcounter2.position.y = -6;
+  Rcounter2.position.x = 150;
+  Rbackwall.add(Rcounter2);
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/6rpZyxp.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/6rpZyxp.png');
+  else var texture = new THREE.TextureLoader().load('/tex/wall15.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2579,13 +3661,21 @@ function kitchen(x,z){
   counter3.position.y = 40;
   counter3.position.x = 150;
   backwall.add(counter3);
+
+  var Rcounter3 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rcounter3);
+  Rcounter3.position.z = 237.5;
+  Rcounter3.position.y = 40;
+  Rcounter3.position.x = 150;
+  Rbackwall.add(Rcounter3);
   
   
   stove(-775,-760);
   stove(-775,-680);
   stove(-775,-600);
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/pzdqvl6.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/pzdqvl6.png');
+  else var texture = new THREE.TextureLoader().load('/tex/vent.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2599,9 +3689,18 @@ function kitchen(x,z){
   vent.position.x = -120;
   backwall.add(vent);
   vent.rotation.x = -0.6;
+
+  var Rvent = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rvent);
+  Rvent.position.z = 18.3;
+  Rvent.position.y = -32;
+  Rvent.position.x = -120;
+  Rbackwall.add(Rvent);
+  Rvent.rotation.x = -0.6;
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/jQtGxCr.png');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/jQtGxCr.png');
+  else var texture = new THREE.TextureLoader().load('/tex/vent02.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2613,12 +3712,26 @@ function kitchen(x,z){
 	venth.rotation.y = Math.PI/2;
   venth.position.x = 20.1;
   vent.add(venth);
+
+  var Rventh = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rventh);
+	Rventh.rotation.y = Math.PI/2;
+  Rventh.position.x = 20.1;
+  Rvent.add(Rventh);
+
   
   var venth2 = new THREE.Mesh(geometry, texMat);
   scene.add(venth2);
 	venth2.rotation.y = -Math.PI/2;
   venth2.position.x = -20.1;
   vent.add(venth2);
+
+  var Rventh2 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rventh2);
+	Rventh2.rotation.y = -Math.PI/2;
+  Rventh2.position.x = -20.1;
+  Rvent.add(Rventh2);
+
   
   var geometry = new THREE.PlaneGeometry(40, 5);
   var venth3 = new THREE.Mesh(geometry, texMat);
@@ -2626,21 +3739,35 @@ function kitchen(x,z){
 	venth3.rotation.x = -Math.PI/2;
   venth3.position.y = 20.1;
   vent.add(venth3);
+
+  var Rventh3 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rventh3);
+	Rventh3.rotation.x = -Math.PI/2;
+  Rventh3.position.y = 20.1;
+  Rvent.add(Rventh3);
+  
   
   var venth4 = new THREE.Mesh(geometry, texMat);
   scene.add(venth4);
 	venth4.rotation.x = Math.PI/2;
   venth4.position.y = -20.1;
   vent.add(venth4);
+
+  var Rventh4 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rventh4);
+	Rventh4.rotation.x = Math.PI/2;
+  Rventh4.position.y = -20.1;
+  Rvent.add(Rventh4);
   
   kitchentable(-620,-680);
  
  }
  
 function stove(x,z){
-	texture = new THREE.TextureLoader().load('https://i.imgur.com/698O6a8.jpg');
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/698O6a8.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/stove01.jpg');
 
-  texMat = new THREE.MeshLambertMaterial({
+  var texMat = new THREE.MeshLambertMaterial({
     map: texture
   });
   
@@ -2651,9 +3778,17 @@ function stove(x,z){
   stove.position.y = 20;
   stove.position.x = x;
   stove.rotation.z = Math.PI/2;
+
+  var Rstove = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rstove);
+  Rstove.position.z = z;
+  Rstove.position.y = 20;
+  Rstove.position.x = x;
+  Rstove.rotation.z = Math.PI/2;
   
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/s8I2ouP.jpg');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/s8I2ouP.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/stove02.jpg');
 
   texMat = new THREE.MeshLambertMaterial({
     map: texture
@@ -2664,12 +3799,25 @@ function stove(x,z){
   scene.add(stoveh);
   stoveh.position.z = 40.1;
   stove.add(stoveh);
+
+  var Rstoveh = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rstoveh);
+  Rstoveh.position.z = 40.1;
+  Rstove.add(Rstoveh);
+
   
   var stoveh2 = new THREE.Mesh(geometry, texMat);
   scene.add(stoveh2);
   stoveh2.position.z = -40.1;
   stoveh2.rotation.y = Math.PI;
   stove.add(stoveh2);
+
+  var Rstoveh2 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rstoveh2);
+  Rstoveh2.position.z = -40.1;
+  Rstoveh2.rotation.y = Math.PI;
+  Rstove.add(Rstoveh2);
+
   
   var geometry = new THREE.PlaneGeometry(40, 80);
   var stoveh3 = new THREE.Mesh(geometry, texMat);
@@ -2677,6 +3825,12 @@ function stove(x,z){
   stoveh3.position.y = -25.1;
 	stoveh3.rotation.x = Math.PI/2;
   stove.add(stoveh3);
+
+  var Rstoveh3 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rstoveh3);
+  Rstoveh3.position.y = -25.1;
+	Rstoveh3.rotation.x = Math.PI/2;
+  Rstove.add(Rstoveh3);
   
   
   var geometry = new THREE.BoxGeometry(50, 5, 80);
@@ -2685,8 +3839,15 @@ function stove(x,z){
   rangehood.position.x = 56;
 	rangehood.rotation.z = Math.PI/2;
   stove.add(rangehood);
+
+  var Rrangehood = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rrangehood);
+  Rrangehood.position.x = 56;
+	Rrangehood.rotation.z = Math.PI/2;
+  Rstove.add(Rrangehood);
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/table02.jpg');
 
   texMat = new THREE.MeshLambertMaterial({
     map: texture
@@ -2699,12 +3860,20 @@ function stove(x,z){
   rangehood2.position.x = 56;
   rangehood2.position.y = 25;
   rangehood2.rotation.x = Math.PI;
+
+  var Rrangehood2 = new THREE.Mesh( geometry, texMat );
+	sceneRTT.add( Rrangehood2 );
+  Rstove.add(Rrangehood2);
+  Rrangehood2.position.x = 56;
+  Rrangehood2.position.y = 25;
+  Rrangehood2.rotation.x = Math.PI;
 }
 
 function kitchentable(x,z){
-	texture = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/table02.jpg');
 
-  texMat = new THREE.MeshPhongMaterial({
+  var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
@@ -2715,8 +3884,16 @@ function kitchentable(x,z){
 	ktable.position.z = z;
   ktable.position.x = x;
   ktable.position.y = 40;
+
+  var Rktable = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rktable);
+  Rktable.rotation.y = Math.PI/2;
+	Rktable.position.z = z;
+  Rktable.position.x = x;
+  Rktable.position.y = 40;
   
-  texture = new THREE.TextureLoader().load('https://i.imgur.com/VuUCXhj.jpg');
+  if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/VuUCXhj.jpg');
+  else var texture = new THREE.TextureLoader().load('/tex/kitchen02.jpg');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2730,6 +3907,14 @@ function kitchentable(x,z){
   ktable1.position.x = 60;
   ktable1.position.y = -20;
   ktable.add(ktable1);
+
+  var Rktable1 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rktable1);
+	Rktable1.position.z = -40;
+  Rktable1.position.x = 60;
+  Rktable1.position.y = -20;
+  Rktable.add(Rktable1);
+
   
   var ktable2 = new THREE.Mesh(geometry, texMat);
   scene.add(ktable2);
@@ -2737,6 +3922,14 @@ function kitchentable(x,z){
   ktable2.position.x = 60;
   ktable2.position.y = -20;
   ktable.add(ktable2);
+
+  var Rktable2 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rktable2);
+	Rktable2.position.z = 40;
+  Rktable2.position.x = 60;
+  Rktable2.position.y = -20;
+  Rktable.add(Rktable2);
+
   
   var ktable3 = new THREE.Mesh(geometry, texMat);
   scene.add(ktable3);
@@ -2744,6 +3937,14 @@ function kitchentable(x,z){
   ktable3.position.x = -60;
   ktable3.position.y = -20;
   ktable.add(ktable3);
+
+  var Rktable3 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rktable3);
+	Rktable3.position.z = 40;
+  Rktable3.position.x = -60;
+  Rktable3.position.y = -20;
+  Rktable.add(Rktable3);
+
   
   var ktable4 = new THREE.Mesh(geometry, texMat);
   scene.add(ktable4);
@@ -2751,11 +3952,19 @@ function kitchentable(x,z){
   ktable4.position.x = -60;
   ktable4.position.y = -20;
   ktable.add(ktable4);
+
+  var Rktable4 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rktable4);
+	Rktable4.position.z = -40;
+  Rktable4.position.x = -60;
+  Rktable4.position.y = -20;
+  Rktable.add(Rktable4);
 }
  
 
 function makeboxes(){
-	var texture = new THREE.TextureLoader().load('https://i.imgur.com/a8bRyAF.png');
+	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/a8bRyAF.png');
+  else var texture = new THREE.TextureLoader().load('/tex/boxtex.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2790,6 +3999,34 @@ function makeboxes(){
   scene.add(box6);
   box6.position.set(119,30,-83);
   box6.rotation.y -= 0.55;
+
+
+
+  var Rbox = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox);
+  Rbox.position.set(180,10,10);
+  Rbox.rotation.y += 0.35;
+  var Rbox2 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox2);
+  Rbox2.position.set(175,10,-15);
+  Rbox2.rotation.y -= 0.65;
+  var Rbox3 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox3);
+  Rbox3.position.set(183,30,-5);
+  Rbox3.rotation.y -= 0.25;
+  
+  var Rbox4 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox4);
+  Rbox4.position.set(130,10,-95);
+  Rbox4.rotation.y -= 0.25;
+  var Rbox5 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox5);
+  Rbox5.position.set(118,10,-70);
+  Rbox5.rotation.y -= 0.75;
+  var Rbox6 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox6);
+  Rbox6.position.set(119,30,-83);
+  Rbox6.rotation.y -= 0.55;
   
   
   ////left side
@@ -2817,6 +4054,29 @@ function makeboxes(){
   box25.position.set(-118,30,-90);
   box25.rotation.y -= 0.25;
 
+
+  var Rbox21 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox21);
+  Rbox21.position.set(-180,10,10);
+  Rbox21.rotation.y += 0.35;
+  var Rbox22 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox22);
+  Rbox22.position.set(-177,10,-15);
+  Rbox22.rotation.y += 0.01;
+  var Rbox23 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox23);
+  Rbox23.position.set(-179,30,-17);
+  Rbox23.rotation.y -= 0.35;
+  
+  
+  var Rbox24 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox24);
+  Rbox24.position.set(-118,10,-90);
+  Rbox24.rotation.y += 0.35;
+  var Rbox25 = new THREE.Mesh(geometry, texMat);
+  sceneRTT.add(Rbox25);
+  Rbox25.position.set(-118,30,-90);
+  Rbox25.rotation.y -= 0.25;
   
 }
 
@@ -2828,31 +4088,82 @@ function readModel (modelName, targetSize = 40, targetX, targetY, targetZ, rotat
         }
     };
 
-    var onError = function(xhr) {};
 
-    var mtlLoader = new THREE.MTLLoader();
-    mtlLoader.setPath('models/');
-    mtlLoader.load(modelName+'.mtl', function(materials){
-        materials.preload();
+    var onError = function () { };
 
-        var objLoader = new THREE.OBJLoader();
-        objLoader.setMaterials(materials);
-        objLoader.setPath('models/')
-        objLoader.load(modelName+'.obj',function(object){
-            let theObject = unitize(object, targetSize);
-            //theObject.add(new THREE.BoxHelper(theObject))
-            theObject.name = 'OBJ'
-            car.add(theObject);
-            theObject.position.set(targetX, targetY, targetZ);
-            theObject.rotation.x += rotationX;
-            theObject.rotation.y += rotationY;
-            theObject.rotation.z += rotationZ;
+    const manager = new THREE.LoadingManager();
+    manager.addHandler( /\.dds$/i, new DDSLoader() );
 
-        }, onProgress, onError);
+
+
+    new MTLLoader( manager )
+      .setPath('models/')
+      .load( modelName+'.mtl',function(materials){
+    materials.preload();
+  
+    new OBJLoader( manager )
+      .setMaterials( materials )
+      .setPath('models/')
+      .load(modelName+'.obj',function(object){
+        let theObject = unitize(object, targetSize);
+        //theObject.name = 'OBJ'
+        scene.add(theObject);
+        //car.add(theObject);
+        //Rcar.add(theObject);
+        theObject.position.set(targetX, targetY, targetZ);
+        theObject.rotation.x += rotationX;
+        theObject.rotation.y += rotationY;
+        theObject.rotation.z += rotationZ;
+  
+      }, onProgress, onError);
+  
     });
 
 
 }
+
+function RTTreadModel (modelName, targetSize = 40, targetX, targetY, targetZ, rotationX, rotationY, rotationZ){
+    var onProgress = function(xhr){
+        if(xhr.lengthComputable){
+            var percentComplete = xhr.loaded / xhr.total * 100;
+            console.log(Math.round(percentComplete, 2) + '% downloaded');
+        }
+    };
+
+
+    var onError = function () { };
+
+    const manager = new THREE.LoadingManager();
+    manager.addHandler( /\.dds$/i, new DDSLoader() );
+
+
+
+    new MTLLoader( manager )
+      .setPath('models/')
+      .load( modelName+'.mtl',function(materials){
+    materials.preload();
+  
+    new OBJLoader( manager )
+      .setMaterials( materials )
+      .setPath('models/')
+      .load(modelName+'.obj',function(object){
+        let theObject = unitize(object, targetSize);
+        //theObject.name = 'OBJ'
+        sceneRTT.add(theObject);
+        //car.add(theObject);
+        //Rcar.add(theObject);
+        theObject.position.set(targetX, targetY, targetZ);
+        theObject.rotation.x += rotationX;
+        theObject.rotation.y += rotationY;
+        theObject.rotation.z += rotationZ;
+  
+      }, onProgress, onError);
+  
+    });
+
+
+}
+
 
 function unitize(object, targetSize){
     var box3 = new THREE.Box3();
@@ -2874,7 +4185,11 @@ function unitize(object, targetSize){
 }
 
 		
-
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
         
 
     </script>
@@ -2882,3 +4197,7 @@ function unitize(object, targetSize){
 </body>
 
 </html>
+
+
+  
+  
