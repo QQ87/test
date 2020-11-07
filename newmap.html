@@ -164,7 +164,7 @@ function init() {
 
   ///////////////////////////////////////////////////////  floor
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/DrvlmNW.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/woodenfloor.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/woodenfloor.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -243,7 +243,7 @@ function init() {
 
   var geometry = new THREE.BoxGeometry(200, wallheight , 5);
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/iU1gtzm.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall01.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall01.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -256,7 +256,7 @@ function init() {
   sceneRTT.add(Rinitwall1);
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/L6OkHzh.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall02.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall02.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -479,7 +479,7 @@ function leftflashing() {
 function maketable() {
 
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/S1ilknr.png');
-  else var texture = new THREE.TextureLoader().load('/tex/white.png');
+  else var texture = new THREE.TextureLoader().load('tex/white.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -528,14 +528,14 @@ function maketable() {
   
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/pZgBo3R.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/controlpanel01.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/controlpanel01.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   if(Islocal != 1) var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
-  var texture2 = new THREE.TextureLoader().load('/tex/controlpanel02.jpg');
+  var texture2 = new THREE.TextureLoader().load('tex/controlpanel02.jpg');
 
   var texMat2 = new THREE.MeshPhongMaterial({
     map: texture2
@@ -899,7 +899,7 @@ function makewall(Dsize, wallheight) {
 	var geometry = new THREE.BoxGeometry(5, wallheight ,100);
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/nwTSw4l.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall03.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall03.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -917,7 +917,7 @@ function makewall(Dsize, wallheight) {
   var geometry = new THREE.BoxGeometry(5, wallheight ,100);
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/gIqf5Lb.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall04.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall04.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -936,7 +936,7 @@ function makewall(Dsize, wallheight) {
   var geometry = new THREE.BoxGeometry(5, wallheight, 100 - Dsize);
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/2nQfXeF.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall05.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall05.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -953,7 +953,7 @@ function makewall(Dsize, wallheight) {
 
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/7FI95WC.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall06.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall06.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -970,7 +970,7 @@ function makewall(Dsize, wallheight) {
 
   ///////////////////////////door//////////////////////////
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/awWOSCI.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/door.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/door.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -998,7 +998,7 @@ function makewindow(wallheight, windowsize) {
 	
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/pzdqvl6.png');
-  else var texture = new THREE.TextureLoader().load('/tex/vent.png');
+  else var texture = new THREE.TextureLoader().load('tex/vent.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1022,7 +1022,7 @@ function makewindow(wallheight, windowsize) {
   });
   //front
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/w20eRrs.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall07.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall07.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1040,7 +1040,7 @@ function makewindow(wallheight, windowsize) {
   var geometry = new THREE.BoxGeometry(5, windowsize + 20, 200);
   //right
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/6rpZyxp.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall08.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall08.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1056,7 +1056,7 @@ function makewindow(wallheight, windowsize) {
 
   //left
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/CaIo9vS.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall09.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall09.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1075,7 +1075,7 @@ function makewindow(wallheight, windowsize) {
   var geometry = new THREE.BoxGeometry((200 - windowsize) / 2, windowsize, 5);
   //back left
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/BWZ4az3.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall10.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall10.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1091,7 +1091,7 @@ function makewindow(wallheight, windowsize) {
 
   //back right
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/1aG8ivb.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall11.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall11.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1109,7 +1109,7 @@ function makewindow(wallheight, windowsize) {
   var geometry = new THREE.BoxGeometry(2, windowsize, 80);
 
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/ZUWRF8R.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/ventinside.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/ventinside.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1431,7 +1431,7 @@ function makeoutside() {
   var loader = new THREE.TextureLoader();
 
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/FM8caZz.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/outsidefloor.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/outsidefloor.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1454,7 +1454,7 @@ function makeoutside() {
 
 
   if(Islocal != 1) texture = loader.load('https://i.imgur.com/G634HPV.png');
-  else texture = loader.load('/tex/wall12.png');
+  else texture = loader.load('tex/wall12.png');
 
   texture.repeat.set(1.5, 1);
   texture.wrapS = THREE.RepeatWrapping;
@@ -1494,7 +1494,7 @@ function makeoutside() {
 
 	
   if(Islocal != 1) var texture = loader.load('https://i.imgur.com/G634HPV.png');
-  else texture = loader.load('/tex/wall12.png');
+  else texture = loader.load('tex/wall12.png');
 
   texture.repeat.set(1, 1);
   texture.wrapS = THREE.RepeatWrapping;
@@ -1517,7 +1517,7 @@ function makeoutside() {
 
   
   if(Islocal != 1) var texture = loader.load('https://i.imgur.com/G634HPV.png');
-  else texture = loader.load('/tex/wall12.png');
+  else texture = loader.load('tex/wall12.png');
 
   texture.repeat.set(0.75, 1);
   texture.wrapS = THREE.RepeatWrapping;
@@ -1588,7 +1588,7 @@ function makediningroom(){
   var loader = new THREE.TextureLoader();
 
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/mdXDao3.png');
-  else var texture = new THREE.TextureLoader().load('/tex/diningfloor.png');
+  else var texture = new THREE.TextureLoader().load('tex/diningfloor.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -1616,7 +1616,7 @@ function makediningroom(){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1640,7 +1640,7 @@ function makediningroom(){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1663,7 +1663,7 @@ function makediningroom(){
 
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1687,7 +1687,7 @@ function makediningroom(){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1710,7 +1710,7 @@ function makediningroom(){
 
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1734,7 +1734,7 @@ function makediningroom(){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1757,7 +1757,7 @@ function makediningroom(){
 
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1780,7 +1780,7 @@ function makediningroom(){
 
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1803,7 +1803,7 @@ function makediningroom(){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1827,7 +1827,7 @@ function makediningroom(){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1851,7 +1851,7 @@ function makediningroom(){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -1926,7 +1926,7 @@ function stage(x,z){
   var loader = new THREE.TextureLoader();
   
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/0swWBqB.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/stage.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/stage.jpg');
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -2086,7 +2086,7 @@ function stage(x,z){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/0swWBqB.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/stage.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/stage.jpg');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -2144,21 +2144,21 @@ function tables(x,z,R){
   var loader = new THREE.TextureLoader();
 
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/beiOFVd.png');
-  else var texture = new THREE.TextureLoader().load('/tex/table01.png');
+  else var texture = new THREE.TextureLoader().load('tex/table01.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   if(Islocal != 1) var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
-  else var texture2 = new THREE.TextureLoader().load('/tex/table02.jpg');
+  else var texture2 = new THREE.TextureLoader().load('tex/table02.jpg');
 
   var texMat2 = new THREE.MeshPhongMaterial({
     map: texture2
   });
   
   if(Islocal != 1) var texture3 = new THREE.TextureLoader().load('https://i.imgur.com/I9NueiU.jpg');
-  else var texture3 = new THREE.TextureLoader().load('/tex/table03.jpg');
+  else var texture3 = new THREE.TextureLoader().load('tex/table03.jpg');
 
   var texMat3 = new THREE.MeshPhongMaterial({
     map: texture3
@@ -2166,11 +2166,11 @@ function tables(x,z,R){
   
   //loader.setCrossOrigin('');
   if(Islocal != 1) var tex = loader.load('https://i.imgur.com/beiOFVd.png');
-  else var tex = loader.load('/tex/table01.png');
+  else var tex = loader.load('tex/table01.png');
   if(Islocal != 1) var alpha2 = loader.load('https://i.imgur.com/KKaGud6.png');
-  else var alpha2 = loader.load('/tex/table04.png');
+  else var alpha2 = loader.load('tex/table04.png');
 	if(Islocal != 1) var alpha = loader.load('https://i.imgur.com/gcqu2PW.png')
-  else var alpha = loader.load('/tex/table05.png');
+  else var alpha = loader.load('tex/table05.png');
   
   
   
@@ -2494,21 +2494,21 @@ function counter(x,z){
   var loader = new THREE.TextureLoader();
 
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/O3szElw.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/counter01.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/counter01.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   if(Islocal != 1) var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
-  else var texture2 = new THREE.TextureLoader().load('/tex/counter02.jpg');
+  else var texture2 = new THREE.TextureLoader().load('tex/counter02.jpg');
 
   var texMat2 = new THREE.MeshPhongMaterial({
     map: texture2
   });
   
   if(Islocal != 1) var texture3 = new THREE.TextureLoader().load('https://i.imgur.com/I9NueiU.jpg');
-  else var texture3 = new THREE.TextureLoader().load('/tex/counter03.jpg');
+  else var texture3 = new THREE.TextureLoader().load('tex/counter03.jpg');
 
   var texMat3 = new THREE.MeshPhongMaterial({
     map: texture3
@@ -2638,7 +2638,7 @@ function counter(x,z){
 
 function restroom(x,z){
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2658,7 +2658,7 @@ function restroom(x,z){
 
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2711,7 +2711,7 @@ function restroom(x,z){
   
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2751,7 +2751,7 @@ function restroom(x,z){
 
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2790,7 +2790,7 @@ function restroom(x,z){
 
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/skdK9KX.png');
-  else var texture = new THREE.TextureLoader().load('/tex/restroom01.png');
+  else var texture = new THREE.TextureLoader().load('tex/restroom01.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2813,7 +2813,7 @@ function restroom(x,z){
   
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/MUaGcp3.png');
-  else var texture = new THREE.TextureLoader().load('/tex/restroom02.png');
+  else var texture = new THREE.TextureLoader().load('tex/restroom02.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2846,7 +2846,7 @@ function restroom(x,z){
 
 function makesink(x,z){
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/FM8caZz.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/sink01.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/sink01.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2923,7 +2923,7 @@ function makesink(x,z){
 
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/KcLkzzZ.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/sink02.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/sink02.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2960,7 +2960,7 @@ function makesink(x,z){
 
 function storeroom(x,z){
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -2999,7 +2999,7 @@ function storeroom(x,z){
   Rstorewall2.position.z = 135;
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3024,7 +3024,7 @@ function storeroom(x,z){
   
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3049,7 +3049,7 @@ function storeroom(x,z){
   
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3112,7 +3112,7 @@ function storeroom(x,z){
   storedoorh2.rotation.y += Math.PI; 
   */
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/mdXDao3.png');
-  else var texture = new THREE.TextureLoader().load('/tex/diningfloor.png');
+  else var texture = new THREE.TextureLoader().load('tex/diningfloor.png');
 
 
   var texMat = new THREE.MeshPhongMaterial({
@@ -3150,21 +3150,21 @@ function storeroom(x,z){
 
 function storeroomtables(x,z){
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/beiOFVd.png');
-  else var texture = new THREE.TextureLoader().load('/tex/table01.png');
+  else var texture = new THREE.TextureLoader().load('tex/table01.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
   
   if(Islocal != 1) var texture2 = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
-  else var texture2 = new THREE.TextureLoader().load('/tex/table02.jpg');
+  else var texture2 = new THREE.TextureLoader().load('tex/table02.jpg');
 
   var texMat2 = new THREE.MeshPhongMaterial({
     map: texture2
   });
   
   if(Islocal != 1) var texture3 = new THREE.TextureLoader().load('https://i.imgur.com/I9NueiU.jpg');
-  else var texture3 = new THREE.TextureLoader().load('/tex/table03.jpg');
+  else var texture3 = new THREE.TextureLoader().load('tex/table03.jpg');
 
   var texMat3 = new THREE.MeshPhongMaterial({
     map: texture3
@@ -3382,7 +3382,7 @@ function storeroomtables(x,z){
 function kitchen(x,z){
 
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3406,7 +3406,7 @@ function kitchen(x,z){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -3427,7 +3427,7 @@ function kitchen(x,z){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
   texMat = new THREE.MeshPhongMaterial({
     map: texture
   });
@@ -3450,7 +3450,7 @@ function kitchen(x,z){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/As3Bhdi.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall13.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall13.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3474,7 +3474,7 @@ function kitchen(x,z){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/G634HPV.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall12.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall12.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3499,7 +3499,7 @@ function kitchen(x,z){
   
   
   if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/ZUWRF8R.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/ventinside.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/ventinside.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3570,7 +3570,7 @@ function kitchen(x,z){
 
 
 	if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/mdXDao3.png');
-  else var texture = new THREE.TextureLoader().load('/tex/diningfloor.png');
+  else var texture = new THREE.TextureLoader().load('tex/diningfloor.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3598,7 +3598,7 @@ function kitchen(x,z){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/kPmETQG.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall14.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall14.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3625,7 +3625,7 @@ function kitchen(x,z){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/vDGQV3k.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/kitchen01.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/kitchen01.jpg');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3648,7 +3648,7 @@ function kitchen(x,z){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/6rpZyxp.png');
-  else var texture = new THREE.TextureLoader().load('/tex/wall15.png');
+  else var texture = new THREE.TextureLoader().load('tex/wall15.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3675,7 +3675,7 @@ function kitchen(x,z){
   stove(-775,-600);
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/pzdqvl6.png');
-  else var texture = new THREE.TextureLoader().load('/tex/vent.png');
+  else var texture = new THREE.TextureLoader().load('tex/vent.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3700,7 +3700,7 @@ function kitchen(x,z){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/jQtGxCr.png');
-  else var texture = new THREE.TextureLoader().load('/tex/vent02.png');
+  else var texture = new THREE.TextureLoader().load('tex/vent02.png');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3765,7 +3765,7 @@ function kitchen(x,z){
  
 function stove(x,z){
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/698O6a8.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/stove01.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/stove01.jpg');
 
   var texMat = new THREE.MeshLambertMaterial({
     map: texture
@@ -3788,7 +3788,7 @@ function stove(x,z){
   
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/s8I2ouP.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/stove02.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/stove02.jpg');
 
   texMat = new THREE.MeshLambertMaterial({
     map: texture
@@ -3847,7 +3847,7 @@ function stove(x,z){
   Rstove.add(Rrangehood);
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/table02.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/table02.jpg');
 
   texMat = new THREE.MeshLambertMaterial({
     map: texture
@@ -3871,7 +3871,7 @@ function stove(x,z){
 
 function kitchentable(x,z){
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/Wvoy1mm.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/table02.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/table02.jpg');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3893,7 +3893,7 @@ function kitchentable(x,z){
   Rktable.position.y = 40;
   
   if(Islocal != 1) texture = new THREE.TextureLoader().load('https://i.imgur.com/VuUCXhj.jpg');
-  else var texture = new THREE.TextureLoader().load('/tex/kitchen02.jpg');
+  else var texture = new THREE.TextureLoader().load('tex/kitchen02.jpg');
 
   texMat = new THREE.MeshPhongMaterial({
     map: texture
@@ -3964,7 +3964,7 @@ function kitchentable(x,z){
 
 function makeboxes(){
 	if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/a8bRyAF.png');
-  else var texture = new THREE.TextureLoader().load('/tex/boxtex.png');
+  else var texture = new THREE.TextureLoader().load('tex/boxtex.png');
 
   var texMat = new THREE.MeshPhongMaterial({
     map: texture
