@@ -22,7 +22,9 @@
     </style>
 </head>
 <body>
+<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
 <script type=module>
+    
     import * as THREE from 'https://raw.githack.com/mrdoob/three.js/dev/build/three.module.js';
     import { OrbitControls } from 'https://raw.githack.com/mrdoob/three.js/dev/examples/jsm/controls/OrbitControls.js';
     import { MTLLoader } from 'https://raw.githack.com/mrdoob/three.js/dev/examples/jsm/loaders/MTLLoader.js';
@@ -32,10 +34,11 @@
 
     var Islocal = 1; ///圖片路徑  1 = 路徑     else = imgur
 
+    var keyboard = new KeyboardState();
     var camera, camera2, scene, renderer, cameraHUD, sceneRTT, renderTarget;
     var leftdoor, rightdoor, windowdoor;
     var Rleftdoor, Rrightdoor, Rwindowdoor;
-    var wallheight = 60,  windowsize = 40;
+    var wallheight = 100,  windowsize = 40;
     var lightstate1 = 0,  lightstate2 = 0,  lightstate3 = 0;
     var light1, light11, light12, light2, light21, light22, light3;
     var Rlight1, Rlight11, Rlight12, Rlight2, Rlight21, Rlight22, Rlight3;
@@ -44,22 +47,20 @@
     var raycaster = new THREE.Raycaster();
     var rightlightpickables = [],  leftlightpickables = [],  rightdoorpickables = [],  leftdoorpickables = [],  windowdoorpickables = [],  windowlightpickables = [],  camerapickables = [],
       rightmappickables = [],  leftmappickables = [], cam1pickables = [], cam2pickables = [], cam3pickables = [], cam4pickables = [], cam5pickables = [];
-    var rotationy = 0,  viewpoint = 1;var Time, usage = 1,  power = 360;
+    var rotationy = 0,  viewpoint = 1;
     var quickswitch = 0,  switchflag = 0;
     var test = new THREE.Vector3(0, 0, 0);
     var breturndegree = new THREE.Vector3(0, 0, 0);
     var returndegree = new THREE.Vector3(10, 0, 0);
-    var tablet, tabletbody, fliptheta = 0,  pickup = 0;
     var hudmap, outcameraflag = 0, car, Rcar;
     var dininglight, stagelight, kitchenlight, storeroomlight, restroomlight, counterlight, roomlight;
     var Rdininglight, Rstagelight, Rkitchenlight, Rstoreroomlight, Rrestroomlight, Rcounterlight, Rroomlight;
+    var Progressnow;
     var cameraauto = 0 , cameraautoflag = 0;
-    var camerabox, camerastick, CAM = 6;
+    var camerabox, camerastick, CAM = 6, progresstext1, progresstext2;
     var condict=0;
 
-		var test = new THREE.Vector3(0,0,0);
     var movingstep=1, block=1,mov=0, rdoor=false,ldoor=false,movcor=0,wdoor=false; // ghost moving variable
-    var tablet, tabletbody, fliptheta = 0,  pickup = 0;
 
 
 		var controls, stats, clock, ghost, ghost2, gui, t = 0, t2 = 0, gControl, steps, keys = [], backkeys = [] ,intkey = [], backintkey = [], move, buildMove;//鬼
@@ -71,7 +72,7 @@
     var meshMaterial;
 
     /////////////////////// semaphone
-    var gyro,fin=0,ran=0,infloor;
+    var gyro,fin=0,ran=0,infloor,com=0,release=0;
     var rotest;/////////// random number
     
 
@@ -96,273 +97,273 @@
 		
 		var pose3={
 				
-							bodyRotate: 0.001,
-							bodyRotate: 0.001,
-							bodyHeight: 0.001,
-							bodyRotateY: 0.001,
-							rightHandX: -0.1876,
-							rightHand2X: -1.1864,
-							rightHandZ: -0.7529,
-							rightHand2Z: 0.001,
-							leftHandX: -0.1867,
-							leftHand2X: -1.1864,
-							leftHandZ: 0.7529,
-							leftHand2Z: 0.001,
-							rightLegX: -0.5054,
-							rightLeg2X: 0.221,
-							rightLegZ: 0.001,
-							rightLeg2Z: 0.001,
-							leftLegX: 0.1302,
-							leftLeg2X: 0.001,
-							leftLegZ: 0.001,
-							leftLeg2Z: 0.001
+      bodyRotate: 0.001,
+      bodyRotate: 0.001,
+      bodyHeight: 0.001,
+      bodyRotateY: 0.001,
+      rightHandX: -0.1876,
+      rightHand2X: -1.1864,
+      rightHandZ: -0.7529,
+      rightHand2Z: 0.001,
+      leftHandX: 0.1302,
+      leftHand2X: -0.8217,
+      leftHandZ: 0.908,
+      leftHand2Z: 0.001,
+      rightLegX: -0.5054,
+      rightLeg2X: 0.221,
+      rightLegZ: 0.001,
+      rightLeg2Z: 0.001,
+      leftLegX: 0.1302,
+      leftLeg2X: 0.001,
+      leftLegZ: 0.001,
+      leftLeg2Z: 0.001
 		}
 		
 		var pose4={
 				
-							bodyRotate: 0.001,
-							bodyRotate: 0.001,
-							bodyHeight: 0.001,
-							bodyRotateY: 0.001,
-							rightHandX: -0.1876,
-							rightHand2X: -1.1864,
-							rightHandZ: -0.7529,
-							rightHand2Z: 0.001,
-							leftHandX: -0.1867,
-							leftHand2X: -1.1864,
-							leftHandZ: 0.7529,
-							leftHand2Z: 0.001,
-							rightLegX: -0.5054,
-							rightLeg2X: 0.3572,
-							rightLegZ: 0.001,
-							rightLeg2Z: 0.001,
-							leftLegX: 0.1302,
-							leftLeg2X: 0.001,
-							leftLegZ: 0.001,
-							leftLeg2Z: 0.001
+      bodyRotate: 0.001,
+			bodyRotate: 0.001,
+			bodyHeight: 0.001,
+      bodyRotateY: 0.001,
+      rightHandX: 0.0394,
+      rightHand2X: -1.1864,
+      rightHandZ: -0.7529,
+      rightHand2Z: 0.001,
+      leftHandX: 0.1102,
+      leftHand2X: -1.1864,
+      leftHandZ: 0.7529,
+      leftHand2Z: 0.001,
+      rightLegX: -0.5054,
+      rightLeg2X: 0.3572,
+      rightLegZ: 0.001,
+      rightLeg2Z: 0.001,
+      leftLegX: 0.1302,
+      leftLeg2X: 0.001,
+      leftLegZ: 0.001,
+      leftLeg2Z: 0.001
 
 		}
 		
 		var pose5={
 				
-							bodyRotate: 0.001,
-							bodyRotate: 0.001,
-							bodyHeight: 0.001,
-							bodyRotateY: 0.001,
-							rightHandX: -0.1876,
-							rightHand2X: -1.1864,
-							rightHandZ: -0.7529,
-							rightHand2Z: 0.001,
-							leftHandX: -0.1867,
-							leftHand2X: -1.1864,
-							leftHandZ: 0.7529,
-							leftHand2Z: 0.001,
-							rightLegX: -0.46,
-							rightLeg2X: 0.4026,
-							rightLegZ: 0.001,
-							rightLeg2Z: 0.001,
-							leftLegX: 0.1302,
-							leftLeg2X: 0.001,
-							leftLegZ: 0.001,
-							leftLeg2Z: 0.001
+    bodyRotate: 0.001,
+    bodyRotate: 0.001,
+    bodyHeight: 0.001,
+    bodyRotateY: 0.001,
+    rightHandX: 0.0594,
+    rightHand2X: -1.1864,
+    rightHandZ: -0.7529,
+    rightHand2Z: 0.001,
+    leftHandX: 0.0902,
+    leftHand2X: -1.1864,
+    leftHandZ: 0.7529,
+    leftHand2Z: 0.001,
+    rightLegX: -0.26,
+    rightLeg2X: 0.4026,
+    rightLegZ: 0.001,
+    rightLeg2Z: 0.001,
+    leftLegX: 0.1302,
+    leftLeg2X: 0.001,
+    leftLegZ: 0.001,
+    leftLeg2Z: 0.001
 		
 		}
 		
 		var pose6={
 				
-							bodyRotate: 0.001,
-							bodyRotate: 0.001,
-							bodyHeight: 0.001,
-							bodyRotateY: 0.001,
-							rightHandX: -0.1876,
-							rightHand2X: -1.1864,
-							rightHandZ: -0.7529,
-							rightHand2Z: 0.001,
-							leftHandX: -0.1867,
-							leftHand2X: -1.1864,
-							leftHandZ: 0.7529,
-							leftHand2Z: 0.001,
-							rightLegX: -0.36,
-							rightLeg2X: 0.4026,
-							rightLegZ: 0.001,
-							rightLeg2Z: 0.001,
-							leftLegX: 0.1302,
-							leftLeg2X: 0.001,
-							leftLegZ: 0.001,
-							leftLeg2Z: 0.001
+      bodyRotate: 0.001,
+      bodyRotate: 0.001,
+      bodyHeight: 0.001,
+      bodyRotateY: 0.001,
+      rightHandX: 0.0794,
+      rightHand2X: -1.141,
+      rightHandZ: -0.7529,
+      rightHand2Z: 0.001,
+      leftHandX: 0.0702,
+      leftHand2X: -1.1864,
+      leftHandZ: 0.7529,
+      leftHand2Z: 0.001,
+      rightLegX: -0.06,
+      rightLeg2X: 0.4026,
+      rightLegZ: 0.001,
+      rightLeg2Z: 0.001,
+      leftLegX: 0.1302,
+      leftLeg2X: 0.001,
+      leftLegZ: 0.001,
+      leftLeg2Z: 0.001
 
 		}
 		
 		var pose7={
 				
-							bodyRotate: 0.001,
-							bodyRotate: 0.001,
-							bodyHeight: 0.001,
-							bodyRotateY: 0.001,
-							rightHandX: -0.1876,
-							rightHand2X: -1.1864,
-							rightHandZ: -0.7529,
-							rightHand2Z: 0.001,
-							leftHandX: -0.1867,
-							leftHand2X: -1.1864,
-							leftHandZ: 0.7529,
-							leftHand2Z: 0.001,
-							rightLegX: -0.36,
-							rightLeg2X: 0.4026,
-							rightLegZ: 0.001,
-							rightLeg2Z: 0.001,
-							leftLegX: -0.233,
-							leftLeg2X: 0.001,
-							leftLegZ: 0.001,
-							leftLeg2Z: 0.001
+      bodyRotate: 0.001,
+      bodyRotate: 0.001,
+      bodyHeight: 1.008,
+      bodyRotateY: 0.001,
+      rightHandX: 0.0994,
+      rightHand2X: -1.121,
+      rightHandZ: -0.7529,
+      rightHand2Z: 0.001,
+      leftHandX: -0.1867,
+      leftHand2X: -1.1864,
+      leftHandZ: 0.7529,
+      leftHand2Z: 0.001,
+      rightLegX: -0.06,
+      rightLeg2X: 0.4026,
+      rightLegZ: 0.001,
+      rightLeg2Z: 0.001,
+      leftLegX: -0.433,
+      leftLeg2X: 0.001,
+      leftLegZ: 0.001,
+      leftLeg2Z: 0.001
 		}
 		
 		var pose8={
 				
-							bodyRotate: 0.001,
-							bodyRotate: 0.001,
-							bodyHeight: 0.001,
-							bodyRotateY: 0.001,
-							rightHandX: -0.1876,
-							rightHand2X: -1.1864,
-							rightHandZ: -0.7529,
-							rightHand2Z: 0.001,
-							leftHandX: -0.1867,
-							leftHand2X: -1.1864,
-							leftHandZ: 0.7529,
-							leftHand2Z: 0.001,
-							rightLegX: -0.16,
-							rightLeg2X: 0.2026,
-							rightLegZ: 0.001,
-							rightLeg2Z: 0.001,
-							leftLegX: -0.433,
-							leftLeg2X: 0.001,
-							leftLegZ: 0.001,
-							leftLeg2Z: 0.001
+      bodyRotate: 0.001,
+      bodyRotate: 0.001,
+      bodyHeight: 0.001,
+      bodyRotateY: 0.001,
+      rightHandX: 0.1194,
+      rightHand2X: -1.101,
+      rightHandZ: -0.7529,
+      rightHand2Z: 0.001,
+      leftHandX: 0.0702,
+      leftHand2X: -1.1864,
+      leftHandZ: 0.7529,
+      leftHand2Z: 0.001,
+      rightLegX: -0.06,
+      rightLeg2X: 0.2026,
+      rightLegZ: 0.001,
+      rightLeg2Z: 0.001,
+      leftLegX: -0.633,
+      leftLeg2X: 0.001,
+      leftLegZ: 0.001,
+      leftLeg2Z: 0.001
 
 		}
 		
 		var pose9={
 				
-							bodyRotate: 0.001,
-							bodyRotate: 0.001,
-							bodyHeight: 0.001,
-							bodyRotateY: 0.001,
-							rightHandX: -0.1876,
-							rightHand2X: -1.1864,
-							rightHandZ: -0.7529,
-							rightHand2Z: 0.001,
-							leftHandX: -0.1867,
-							leftHand2X: -1.1864,
-							leftHandZ: 0.7529,
-							leftHand2Z: 0.001,
-							rightLegX: -0.16,
-							rightLeg2X: 0.2026,
-							rightLegZ: 0.001,
-							rightLeg2Z: 0.001,
-							leftLegX: -0.5054,
-							leftLeg2X: 0.001,
-							leftLegZ: 0.001,
-							leftLeg2Z: 0.001
+      bodyRotate: 0.001,
+      bodyRotate: 0.001,
+      bodyHeight: 0.001,
+      bodyRotateY: 0.001,
+      rightHandX: 0.0994,
+      rightHand2X: -1.101,
+      rightHandZ: -0.7529,
+      rightHand2Z: 0.001,
+      leftHandX: 0.0902,
+      leftHand2X: -1.026,
+      leftHandZ: 0.7529,
+      leftHand2Z: 0.001,
+      rightLegX: -0.16,
+      rightLeg2X: 0.2026,
+      rightLegZ: 0.001,
+      rightLeg2Z: 0.001,
+      leftLegX: -0.7054,
+      leftLeg2X: 0.001,
+      leftLegZ: 0.001,
+      leftLeg2Z: 0.001
 
 		}
 		
 		var pose10={
 				
-							bodyRotate: 0.001,
-							bodyRotate: 0.001,
-							bodyHeight: 0.001,
-							bodyRotateY: 0.001,
-							rightHandX: -0.1876,
-							rightHand2X: -1.1864,
-							rightHandZ: -0.7529,
-							rightHand2Z: 0.001,
-							leftHandX: -0.1867,
-							leftHand2X: -1.1864,
-							leftHandZ: 0.7529,
-							leftHand2Z: 0.001,
-							rightLegX: -0.16,
-							rightLeg2X: 0.2026,
-							rightLegZ: 0.001,
-							rightLeg2Z: 0.001,
-							leftLegX: -0.46,
-							leftLeg2X: 0.221,
-							leftLegZ: 0.001,
-							leftLeg2Z: 0.001
+      bodyRotate: 0.001,
+      bodyRotate: 0.001,
+      bodyHeight: 0.001,
+      bodyRotateY: 0.001,
+      rightHandX: 0.0794,
+      rightHand2X: -1.101,
+      rightHandZ: -0.7529,
+      rightHand2Z: 0.001,
+      leftHandX: 0.902,
+      leftHand2X: -1.026,
+      leftHandZ: 0.7529,
+      leftHand2Z: 0.001,
+      rightLegX: -0.26,
+      rightLeg2X: 0.2026,
+      rightLegZ: 0.001,
+      rightLeg2Z: 0.001,
+      leftLegX: -0.56,
+      leftLeg2X: 0.221,
+      leftLegZ: 0.001,
+      leftLeg2Z: 0.001
 
 		}
 		
 		var pose11={
-							bodyRotate: 0.001,
-							bodyRotate: 0.001,
-							bodyHeight: 0.001,
-							bodyRotateY: 0.001,
-							rightHandX: -0.1876,
-							rightHand2X: -1.1864,
-							rightHandZ: -0.7529,
-							rightHand2Z: 0.001,
-							leftHandX: -0.1867,
-							leftHand2X: -1.1864,
-							leftHandZ: 0.7529,
-							leftHand2Z: 0.001,
-							rightLegX: -0.16,
-							rightLeg2X: 0.2026,
-							rightLegZ: 0.001,
-							rightLeg2Z: 0.001,
-							leftLegX: -0.36,
-							leftLeg2X: 0.3572,
-							leftLegZ: 0.001,
-							leftLeg2Z: 0.001
+      bodyRotate: 0.001,
+      bodyRotate: 0.001,
+      bodyHeight: 0.001,
+      bodyRotateY: 0.001,
+      rightHandX: 0.0594,
+      rightHand2X: -1.121,
+      rightHandZ: -0.7529,
+      rightHand2Z: 0.001,
+      leftHandX: 0.1102,
+      leftHand2X: -0.926,
+      leftHandZ: 0.7529,
+      leftHand2Z: 0.001,
+      rightLegX: -0.36,
+      rightLeg2X: 0.2026,
+      rightLegZ: 0.001,
+      rightLeg2Z: 0.001,
+      leftLegX: -0.36,
+      leftLeg2X: 0.4572,
+      leftLegZ: 0.001,
+      leftLeg2Z: 0.001
 
 		}
 		
 		var pose12={
 				
-							bodyRotate: 0.001,
-							bodyRotate: 0.001,
-							bodyHeight: 0.001,
-							bodyRotateY: 0.001,
-							rightHandX: -0.1876,
-							rightHand2X: -1.1864,
-							rightHandZ: -0.7529,
-							rightHand2Z: 0.001,
-							leftHandX: -0.1867,
-							leftHand2X: -1.1864,
-							leftHandZ: 0.7529,
-							leftHand2Z: 0.001,
-							rightLegX: -0.16,
-							rightLeg2X: 0.2026,
-							rightLegZ: 0.001,
-							rightLeg2Z: 0.001,
-							leftLegX: -0.26,
-							leftLeg2X: 0.4026,
-							leftLegZ: 0.001,
-							leftLeg2Z: 0.001
+      bodyRotate: 0.001,
+      bodyRotate: 0.001,
+      bodyHeight: 0.001,
+      bodyRotateY: 0.001,
+      rightHandX: 0.0394,
+      rightHand2X: -1.141,
+      rightHandZ: -0.7529,
+      rightHand2Z: 0.001,
+      leftHandX: 0.1302,
+      leftHand2X: -0.8,
+      leftHandZ: 0.7529,
+      leftHand2Z: 0.001,
+      rightLegX: -0.46,
+      rightLeg2X: 0.2026,
+      rightLegZ: 0.001,
+      rightLeg2Z: 0.001,
+      leftLegX: -0.26,
+      leftLeg2X: 0.5026,
+      leftLegZ: 0.001,
+      leftLeg2Z: 0.001
 
 		}
 		
 		var pose13={
 				
-							bodyRotate: 0.001,
-							bodyRotate: 0.001,
-							bodyHeight: 0.001,
-							bodyRotateY: 0.001,
-							rightHandX: -0.1876,
-							rightHand2X: -1.1864,
-							rightHandZ: -0.7529,
-							rightHand2Z: 0.001,
-							leftHandX: -0.1867,
-							leftHand2X: -1.1864,
-							leftHandZ: 0.7529,
-							leftHand2Z: 0.001,
-							rightLegX: -0.16,
-							rightLeg2X: 0.2026,
-							rightLegZ: 0.001,
-							rightLeg2Z: 0.001,
-							leftLegX: -0.16,
-							leftLeg2X: 0.3572,
-							leftLegZ: 0.001,
-							leftLeg2Z: 0.001
+      bodyRotate: 0.001,
+      bodyRotate: 0.001,
+      bodyHeight: 1.008,
+      bodyRotateY: 0.001,
+      rightHandX: -0.1876,
+      rightHand2X: -1.1864,
+      rightHandZ: -0.7529,
+      rightHand2Z: 0.001,
+      leftHandX: 0.1302,
+      leftHand2X: -0.8217,
+      leftHandZ: 0.908,
+      leftHand2Z: 0.001,
+      rightLegX: -0.5054,
+      rightLeg2X: 0.221,
+      rightLegZ: 0.001,
+      rightLeg2Z: 0.001,
+      leftLegX: 0.1302,
+      leftLeg2X: 0.001,
+      leftLegZ: 0.001,
+      leftLeg2Z: 0.001
 		}
 	
 		
@@ -417,46 +418,46 @@
 		var backpose5={
 				
 				backbodyRotate: 0.2879,
-                backbodyHeight: 0.001,
-                backbodyRotateY: 1.1191,
+        backbodyHeight: 0.001,
+        backbodyRotateY: 1.1191,
 				backrightHandX: -0.7778,
 				backrightHand2X: -0.5834,
-                backrightHandZ: -0.5852,
+        backrightHandZ: -0.5852,
 				backrightHand2Z: 0.001,
-                backleftHandX: -0.7778,
+        backleftHandX: -0.7778,
 				backleftHand2X: -0.5834,
-                backleftHandZ: 0.5852,
+        backleftHandZ: 0.5852,
 				backleftHand2Z: 0.001,
-                backrightLegX: 0.001,
+        backrightLegX: 0.001,
 				backrightLeg2X: 0.001,
-                backrightLegZ: 0.001,
+        backrightLegZ: 0.001,
 				backrightLeg2Z: 0.001,
-                backleftLegX: 0.001,
+        backleftLegX: 0.001,
 				backleftLeg2X: 0.001,
-                backleftLegZ: 0.001,
+        backleftLegZ: 0.001,
 				backleftLeg2Z: 0.001
 		}
 		
 		var backpose6={
 				
 				backbodyRotate: 0.2879,
-                backbodyHeight: 0.001,
-                backbodyRotateY: 1.1191,
+        backbodyHeight: 0.001,
+        backbodyRotateY: 1.1191,
 				backrightHandX: -1.1864,
 				backrightHand2X: -0.5834,
-                backrightHandZ: -0.5852,
+        backrightHandZ: -0.5852,
 				backrightHand2Z: 0.001,
-                backleftHandX: -1.1864,
+        backleftHandX: -1.1864,
 				backleftHand2X: -0.5834,
-                backleftHandZ: 0.5852,
+        backleftHandZ: 0.5852,
 				backleftHand2Z: 0.001,
-                backrightLegX: 0.001,
+        backrightLegX: 0.001,
 				backrightLeg2X: 0.001,
-                backrightLegZ: 0.001,
+        backrightLegZ: 0.001,
 				backrightLeg2Z: 0.001,
-                backleftLegX: 0.001,
+        backleftLegX: 0.001,
 				backleftLeg2X: 0.001,
-                backleftLegZ: 0.001,
+        backleftLegZ: 0.001,
 				backleftLeg2Z: 0.001
 		
 		}
@@ -759,58 +760,58 @@
                     this.rightLeg.add(rightLegMesh);
           ////////////////////////////////////////////////////
             this.rightLeg2 = new THREE.Object3D();
-                    this.rightLeg2.position.set(0,-13.0,0);
+            this.rightLeg2.position.set(0,-13.0,0);
 
-                    let rightLegMesh2 = new THREE.Mesh(new THREE.CylinderGeometry(3, 4.5, 13, 32),gg);
-                    rightLegMesh2.position.set(0,-5.0,0);
-                    this.rightLeg2.add(rightLegMesh2);
-
-
+            let rightLegMesh2 = new THREE.Mesh(new THREE.CylinderGeometry(3, 4.5, 13, 32),gg);
+            rightLegMesh2.position.set(0,-5.0,0);
+            this.rightLeg2.add(rightLegMesh2);
 
 
-                    this.leftLeg = new THREE.Object3D();
-                    this.leftLeg.position.set(7,-22,0);
 
-                    let leftLegMesh = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 3, 13, 32),gg);
-                    leftLegMesh.position.set(0,-5.0,0);
-                    this.leftLeg.add(leftLegMesh);
+
+            this.leftLeg = new THREE.Object3D();
+            this.leftLeg.position.set(7,-22,0);
+
+            let leftLegMesh = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 3, 13, 32),gg);
+            leftLegMesh.position.set(0,-5.0,0);
+            this.leftLeg.add(leftLegMesh);
           /////////////////////////////////////////////////////
-                    this.leftLeg2 = new THREE.Object3D();
-                    this.leftLeg2.position.set(0,-13.0,0);
+            this.leftLeg2 = new THREE.Object3D();
+            this.leftLeg2.position.set(0,-13.0,0);
 
-                    let leftLegMesh2 = new THREE.Mesh(new THREE.CylinderGeometry(3, 4.5, 13, 32),gg);
-                    leftLegMesh2.position.set(0,-5.0,0);
-                    this.leftLeg2.add(leftLegMesh2);
+            let leftLegMesh2 = new THREE.Mesh(new THREE.CylinderGeometry(3, 4.5, 13, 32),gg);
+            leftLegMesh2.position.set(0,-5.0,0);
+            this.leftLeg2.add(leftLegMesh2);
             
             
 
 
-              this.leftHand = new THREE.Object3D();
-              this.leftHand.position.set(12,5,0);
+            this.leftHand = new THREE.Object3D();
+            this.leftHand.position.set(12,5,0);
 
 
-              let leftHandMesh = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 13, 32),gg);     
+            let leftHandMesh = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 13, 32),gg);     
             //leftHandMesh.position.set(0,0,0);
-                    this.leftHand.add(leftHandMesh);
+            this.leftHand.add(leftHandMesh);
           
           /////////////////////////////////////////////////////
-              this.leftHand2 = new THREE.Object3D();
-              this.leftHand2.position.set(0,-6.5,0);
+            this.leftHand2 = new THREE.Object3D();
+            this.leftHand2.position.set(0,-6.5,0);
 
-              let leftHandMesh2 = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 13, 32),gg);
-              leftHandMesh2.position.set(0,-6.5,0);
-              this.leftHand2.add(leftHandMesh2);
+            let leftHandMesh2 = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 13, 32),gg);
+            leftHandMesh2.position.set(0,-6.5,0);
+            this.leftHand2.add(leftHandMesh2);
       
       
       
 
         
             this.rightHand = new THREE.Object3D();
-                    this.rightHand.position.set(-12,5,0);
+            this.rightHand.position.set(-12,5,0);
 
-                    let rightHandMesh = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 13, 32),gg);
-                    //rightHandMesh.position.set(0,0,0);
-                    this.rightHand.add(rightHandMesh);
+            let rightHandMesh = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 13, 32),gg);
+            //rightHandMesh.position.set(0,0,0);
+            this.rightHand.add(rightHandMesh);
             
             //////////////////////////////////////////////////
             this.rightHand2 = new THREE.Object3D();
@@ -820,7 +821,29 @@
             rightHandMesh2.position.set(0,-6.5,0);
             this.rightHand2.add(rightHandMesh2);
 
-            this.body.add(this.palm,this.palm2,this.head, this.rightLeg,this.rightLeg2, this.leftLeg,this.leftLeg2, this.leftHand,this.leftHand2, this.rightHand, this.rightHand2, this.ear1, this.ear2,this.finger,this.finger2,this.finger3,this.finger4,this.finger5, this.finger6, this.finger7, this.finger8,this.body2,this.body3,this.teeth,this.eye1,this.eye2,this.body4,this.body5,this.body6,this.ring,this.ring2,this.ring3,this.ring4,this.ring5,this.ring6,this.ring7,this.ring8,this.ring9,this.ring10,this.head2,this.head3,this.teeth,this.teeth2,this.teeth3,this.teeth4,this.teeth5,this.teeth6,this.teeth7,this.teeth8,this.teeth9,this.ear3,this.ear4,this.bone,this.foot,this.foot2,this.toe,this.toe2,this.toe3,this.toe4,this.toe5,this.toe6,this.eye3,this.eye4,this.palm);
+            var loader = new THREE.TextureLoader();
+            if(Islocal != 1) var map = loader.load("https://i.imgur.com/5JmiXFo.jpg");
+            else map = loader.load('beam.jpg');
+            this.beam = new THREE.Mesh(new THREE.CylinderGeometry(3,30,100,20),new THREE.MeshBasicMaterial({transparent:true, opacity: 0.2, color: '#eb3131', map: map}));
+            this.beam.position.set(6.8,22,55);
+            this.beam.rotation.x=-20.5;
+
+            /////////////////////// LIGHT
+            this.light = new THREE.SpotLight(0xeb3131,1,500,Math.PI/3,0.21,2);
+            this.light.position.set(0,21,-10);
+            this.light.target = this.beam;
+
+            /////////////////////////////////////////////
+            this.beam2 = new THREE.Mesh(new THREE.CylinderGeometry(3,30,100,20),new THREE.MeshBasicMaterial({transparent:true, opacity: 0.2, color: '#eb3131', map: map}));
+            this.beam2.position.set(-6,22,55);
+            this.beam2.rotation.x=-20.5;
+
+            //////////////////////// LIGHT
+            this.light2 = new THREE.SpotLight(0xeb3131,1,500,Math.PI/3,0.21,2);
+            this.light2.position.set(this.beam2.position.x,this.beam.position.y,this.beam.position.z-70);
+            this.light2.target = this.beam2;
+
+            this.body.add(this.palm,this.palm2,this.head, this.rightLeg,this.rightLeg2, this.leftLeg,this.leftLeg2, this.leftHand,this.leftHand2, this.rightHand, this.rightHand2, this.ear1, this.ear2,this.finger,this.finger2,this.finger3,this.finger4,this.finger5, this.finger6, this.finger7, this.finger8,this.body2,this.body3,this.teeth,this.eye1,this.eye2,this.body4,this.body5,this.body6,this.ring,this.ring2,this.ring3,this.ring4,this.ring5,this.ring6,this.ring7,this.ring8,this.ring9,this.ring10,this.head2,this.head3,this.teeth,this.teeth2,this.teeth3,this.teeth4,this.teeth5,this.teeth6,this.teeth7,this.teeth8,this.teeth9,this.ear3,this.ear4,this.bone,this.foot,this.foot2,this.toe,this.toe2,this.toe3,this.toe4,this.toe5,this.toe6,this.eye3,this.eye4,this.palm,this.beam,this.beam2,this.light,this.light2);
             this.leftHand.add(this.leftHand2,this.ring,this.ring2);
             this.rightHand.add(this.rightHand2,this.ring6,this.ring7);
             this.leftLeg.add(this.leftLeg2,this.foot,this.toe,this.toe2,this.toe3);
@@ -859,14 +882,14 @@
       rotationY(y){
         this.body.rotation.y+=y;
         if(this.body.rotation.y>(Math.PI*2) ) this.body.rotation.y-=(Math.PI*2);
-        console.log(this.body.rotation.y);
+        //console.log(this.body.rotation.y);
         //if(this.body.rotation.y>3.14) this.body.rotation.y%=3.14;
       }
 
       rotationX(x){
         this.body.rotation.y-=x;
         if(this.body.rotation.y<0.0) this.body.rotation.y+=(Math.PI*2);
-        console.log(this.body.rotation.y);
+        //console.log(this.body.rotation.y);
         /*
         if(this.body.rotation.y<-3.14){
           this.body.rotation.y%=3.14;
@@ -944,12 +967,12 @@ function init() {
 			var mesh = new THREE.MeshPhongMaterial({map:texture,color:'#470fa8',side: THREE.DoubleSide}); 
 
       ghost = new Ghost(mesh,texture, 1);
-      //ghost2 = new Ghost(mesh,texture, 0);
+      ghost2 = new Ghost(mesh,texture, 0);
             
 			ghost.ghost.rotation.order = 'ZXY';
 			
       ghost.ghost.position.set(-45,0,-1050);
-      //ghost2.ghost.position.set(0,0,-30);
+      ghost2.ghost.position.set(-150,0,-400);
       ghost.changebodyY(95);
            
       ghost.mov=1;
@@ -1050,7 +1073,7 @@ function init() {
       //sceneHUD = new THREE.Scene();
       //camera.lookAt(0,200,-100);
       //////////////////OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOrbit here////////////////////////////////////
-      //let controls = new OrbitControls(camera, renderer.domElement);
+      let controls = new OrbitControls(camera, renderer.domElement);
 
       ////////////////////////////////////////////////////////////////
       //var gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
@@ -1113,6 +1136,25 @@ function init() {
       var Rplane = new THREE.Mesh(geometry, texMat);
       sceneRTT.add(Rplane);
       Rplane.rotation.x = -Math.PI / 2;
+      //upfloor
+      
+
+
+      if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/DrvlmNW.jpg');
+      else var texture = new THREE.TextureLoader().load('tex/upfloor.jpeg');
+
+      texture.repeat.set(2, 2);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+
+      var plane = new THREE.Mesh(new THREE.PlaneGeometry(205, 205),
+        new THREE.MeshPhongMaterial({
+          map: texture
+      }))
+
+      plane.rotation.x = +Math.PI / 2;
+      scene.add(plane);
+      plane.position.set(0,100,0);
       /////////////////////////////////////////   light
       roomlight = new THREE.PointLight(0xffffff, 1, 150);         
       roomlight.position.set(0, 50, 0);                     /////150
@@ -1204,7 +1246,7 @@ function init() {
       sceneRTT.add(Rinitwall2);
 
       // set door size
-      var doorsize = 30;
+      var doorsize = 40;
       makewall(doorsize, wallheight);
       openrightdoor();
       openleftdoor();
@@ -1233,7 +1275,6 @@ function init() {
       
   
       makediningroom();
-      Time = new THREE.Clock();
 
 
       ///test OBJ
@@ -1269,10 +1310,51 @@ function init() {
       makemap();
 
 
-
+      
       
       camera.position.set(0,40,0);
       camera.lookAt(0, 40, -120);
+
+
+      Progressnow = 0;
+      var loader = new THREE.FontLoader();
+      loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
+        if(Math.floor(clock.getElapsedTime() * 10 / 36) < 10) var text = "    " + Math.floor(clock.getElapsedTime() * 10 / 36) + "%";
+        else var text = '0%';
+          var geometry = new THREE.TextGeometry(text, {
+            font: font,
+            size: 4,
+            height: 2.8,
+            curveSegments: 12
+          });
+                
+
+      var material = new THREE.MeshBasicMaterial({color: 0x3db851, side: THREE.DoubleSide});
+      progresstext1 = new THREE.Mesh( geometry, material );
+      scene.add( progresstext1 );
+      progresstext1.position.set(-75, 45, -70);
+      progresstext1.rotation.y += Math.PI/4;
+      })
+
+      loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
+
+      var text = '';   //14 is full
+      var geometry = new THREE.TextGeometry(text, {
+        font: font,
+        size: 3.9,
+        height: 2.8,
+        curveSegments: 12
+      });
+            
+
+      var material = new THREE.MeshBasicMaterial({color: 0x3db851, side: THREE.DoubleSide});
+      progresstext2 = new THREE.Mesh( geometry, material );
+      scene.add( progresstext2 );
+      progresstext2.position.set(-78.2, 39, -66.8);
+      progresstext2.rotation.y += Math.PI/4;
+      })
+
+
       /*
       camera2.position.y = 0;
       CAM = 2;
@@ -1331,14 +1413,14 @@ function init() {
       //(-400,-600) 3
       //(-200,-600) 4
       //(-200,-400) 5
-      //(-150,-400) 6
-      //( 150,-400) 7
+      //(-150,-400) 6 //// important
+      //( 150,-400) 7 //// important
       //( 230,-400) 9
       //( 230,-900) 8
-      //(-400,-720)10
-      //(-200,-720)11
+      //(-400,-720) 10
+      //(-200,-720) 11
       if(condict==1){
-        console.log(ghost.getrotaY());
+        //console.log(ghost.getrotaY());
         if(ghost.getrotaY()<1.49&&fin==0){
           ghost.rotationY(0.01);
         }
@@ -1364,7 +1446,7 @@ function init() {
         }
       }
       else if(condict==2){
-        console.log(ghost.getrotaY());
+        //console.log(ghost.getrotaY());
         if((ghost.getrotaY()<0.1||ghost.getrotaY()>4.7)&&fin==0) ghost.rotationX(0.01);
         else{
             fin=1;
@@ -1427,7 +1509,7 @@ function init() {
           }
         }
         else if(infloor==2){
-          if(rotest>50){
+          if(rotest>1){
             if(ghost.getrotaY()<6.25) ghost.rotationY(0.02);
             else if(ghost.ghost.position.z<=-720) ghost.ghost.position.z+=1;
             else{
@@ -1445,7 +1527,7 @@ function init() {
           }
         }
         else if(infloor==3){
-          if(rotest>50){
+          if(rotest>1){
             if(ghost.getrotaY()>1.51||ghost.getrotaY()<1.48) ghost.rotationY(0.02);
             else if(ghost.ghost.position.x<=-200) ghost.ghost.position.x+=1;
             else{
@@ -1463,7 +1545,7 @@ function init() {
           }
         }
         else if(infloor==4){
-          if(rotest>50){
+          if(rotest<0){
             if(ghost.getrotaY()<4.7||ghost.getrotaY()>4.8) ghost.rotationY(0.02);
             else if(ghost.ghost.position.x>=-400) ghost.ghost.position.x-=1;
             else{
@@ -1481,7 +1563,7 @@ function init() {
           }
         }
         else if(infloor==5){
-          if(rotest>50){
+          if(rotest>1){
             if(ghost.getrotaY()>1.51||ghost.getrotaY()<1.48) ghost.rotationY(0.02);
             else if(ghost.ghost.position.x<=-150) ghost.ghost.position.x+=1;
             else{
@@ -1499,7 +1581,7 @@ function init() {
           }
         }
         else if(infloor==6){
-          if(rotest>50){
+          if(rotest<0){
             if(ghost.getrotaY()>1.51||ghost.getrotaY()<1.48) ghost.rotationY(0.02);
             else if(ghost.ghost.position.x<=150) ghost.ghost.position.x+=1;
             else{
@@ -1507,7 +1589,7 @@ function init() {
               ran=0;
             }
           }
-          else{
+          else if(rotest<0){
             if(ghost.getrotaY()<4.7||ghost.getrotaY()>4.8) ghost.rotationX(0.02);
             else if(ghost.ghost.position.x>=-200) ghost.ghost.position.x-=1;
             else{
@@ -1515,9 +1597,14 @@ function init() {
               ran=0;
             }
           }
+          else{
+            /////////////////////// change close
+            condict=4;
+            ran=0;
+          }
         }
         else if(infloor==7){
-          if(rotest>50){
+          if(rotest<0){
             if(ghost.getrotaY()>1.51||ghost.getrotaY()<1.48) ghost.rotationY(0.02);
               else if(ghost.ghost.position.x<=230) ghost.ghost.position.x+=1;
               else{
@@ -1525,17 +1612,22 @@ function init() {
                 ran=0;
               }
           }
-          else{
+          else if(rotest<0){
             if(ghost.getrotaY()<4.7||ghost.getrotaY()>4.8) ghost.rotationX(0.02);
             else if(ghost.ghost.position.x>=-150) ghost.ghost.position.x-=1;
             else{
               infloor=6;
               ran=0;
             }
+          }
+          else{
+            ///////////////////// change close
+            condict=5;
+            ran=0;
           }         
         }
         else if(infloor==9){
-          if(rotest>50){
+          if(rotest<0){
             if(ghost.getrotaY()>3.15||ghost.getrotaY()<3.13) ghost.rotationY(0.02);
             else if(ghost.ghost.position.z>=-720) ghost.ghost.position.z-=1;
             else{
@@ -1553,7 +1645,7 @@ function init() {
           }
         }
         else if(infloor==8){
-          if(rotest>50){
+          if(rotest<0){
             if(ghost.getrotaY()<4.7) ghost.rotationY(0.02);
             else if(ghost.ghost.position.x>=-400) ghost.ghost.position.x-=1;
             else{
@@ -1571,7 +1663,7 @@ function init() {
           }
         }
         else if(infloor==10){
-          if(rotest<33){
+          if(rotest<0){
             if(ghost.getrotaY()<4.7||ghost.getrotaY()>4.8) ghost.rotationY(0.02);
             else if(ghost.ghost.position.x>=-400) ghost.ghost.position.x-=1;
             else{
@@ -1579,7 +1671,7 @@ function init() {
               ran=0;
             }
           }
-          else if(rotest>33&&rotest<66){
+          else if(rotest<0){
             if(ghost.getrotaY()>3.15||ghost.getrotaY()<3.13) ghost.rotationX(0.02);
             else if(ghost.ghost.position.z>=-875) ghost.ghost.position.z-=1;
             else{
@@ -1597,15 +1689,15 @@ function init() {
           }
         }
         else if(infloor==11){
-          if(rotest<33){
+          if(rotest>1){
             if(ghost.getrotaY()>0.05&&ghost.getrotaY()<6.25)  ghost.rotationY(0.02);
             else if(ghost.ghost.position.z<=-600) ghost.ghost.position.z+=1;
             else{
-              infloor=5;
+              infloor=3;
               ran=0;
             }          
           }
-          else if(rotest>=33&&rotest<66){
+          else if(rotest<0){
             if(ghost.getrotaY()>3.15||ghost.getrotaY()<3.13) ghost.rotationX(0.02);
             else if(ghost.ghost.position.z>=-875) ghost.ghost.position.z-=1;
             else{
@@ -1623,11 +1715,71 @@ function init() {
           }
         }
       }
-          
+      ////////////////////////////////// 10號點 (-150,400)
+      if(condict==4){
+        if(release==0){
+            ghost2.ghost.position.set(-150,0,-400);
+            ghost2.changebodyY(45);
+            release=1;
+        }
+          if((ghost.getrotaY()>0.05&&ghost.getrotaY()<6.25)&&com==0) {
+            ghost.rotationX(0.02);
+          }
+          else if(ghost.ghost.position.z<=-20){
+            ghost.ghost.position.z+=1;
+            ghost2.ghost.position.z+=1;
+            com=1;
+          }
+          else if((ghost.getrotaY()>1.51||ghost.getrotaY()<1.48)&&com==1){
+            ghost.rotationY(0.02);
+            ghost2.rotationY(0.02);
+          }
+          else if(ghost.ghost.position.x<=0.0){
+            ghost.ghost.position.x+=1;
+            ghost2.ghost.position.x+=1;
+          }
+          else{
+            condict=6;
+            com=0;
+          }  
+      }
+      else if(condict==5){
+        if(release==0){
+            ghost2.ghost.position.set(150,0,-400);
+            ghost2.changebodyY(45);
+            release=1;
+        }
+        if(ghost.getrotaY()>0.05&&ghost.getrotaY()<6.25&&com==0){
+            ghost.rotationY(0.02);
+        }
+        else if(ghost.ghost.position.z<=-20){
+            ghost.ghost.position.z+=1;
+            ghost2.ghost.position.z+=1;
+            com=1;
+        }
+        else if((ghost.getrotaY()<4.7||ghost.getrotaY()>4.8)&&com==1){
+            ghost.rotationX(0.02);
+            ghost2.rotationX(0.02);
+        }
+        else if(ghost.ghost.position.x>=0.0){
+           ghost.ghost.position.x-=1;
+           ghost2.ghost.position.x-=1;
+        }
+        else{
+          condict=6;
+          com=0;
+        }          
+      }              
       /////////////////////////////////////////////////////////////////////// set origin position
       requestAnimationFrame(animate);
       //render();
+      if(Math.floor(clock.getElapsedTime() * 10 / 36) != Progressnow && Progressnow <= 100){
+        Progressnow = Math.floor(clock.getElapsedTime() * 10 / 36);
+        progress();
+      }  
       camerarotation(rotationy);
+      var dt = clock.getDelta();
+      update(dt);
       //windowflashing();
       //rightflashing();
       //leftflashing();
@@ -1649,38 +1801,58 @@ function init() {
     
     if(ghost.mov!=3){
           ghost.ghost.rotation.x = intkey[0];
-          ghost.ghost.position.y = intkey[1]-5;
+          ghost2.ghost.rotation.x = intkey[0];
+          ghost.ghost.position.y = intkey[1];
+          ghost2.ghost.position.y = intkey[1];
             
     if(ghost.mov==1){
           ghost.ghost.rotation.y = intkey[2]+0.068;
+          ghost2.ghost.rotation.y = intkey[2]+0.068;
     }
     else if(ghost.mov==2){
           ghost.ghost.rotation.y = intkey[2]*(-1)+0.068;
+          ghost2.ghost.rotation.y = intkey[2]*(-1)+0.068;
     }
 
     ghost.rightHand.rotation.x = intkey[3];
+    ghost2.rightHand.rotation.x = intkey[3];
     ghost.rightHand.rotation.z = intkey[4];
+    ghost2.rightHand.rotation.z = intkey[4];
             
     ghost.rightHand2.rotation.x = intkey[5];
+    ghost2.rightHand2.rotation.x = intkey[5];
     ghost.rightHand2.rotation.z = intkey[6];
+    ghost2.rightHand2.rotation.z = intkey[6];
             
     ghost.leftHand.rotation.x = intkey[7];
+    ghost2.leftHand.rotation.x = intkey[7];
     ghost.leftHand.rotation.z = intkey[8];
+    ghost2.leftHand.rotation.z = intkey[8];
             
     ghost.leftHand2.rotation.x = intkey[9];
+    ghost2.leftHand2.rotation.x = intkey[9];
     ghost.leftHand2.rotation.z = intkey[10];
+    ghost2.leftHand2.rotation.z = intkey[10];
     
     ghost.rightLeg.rotation.x = intkey[11];
+    ghost2.rightLeg.rotation.x = intkey[11];
     ghost.rightLeg.rotation.z = intkey[12];
+    ghost2.rightLeg.rotation.z = intkey[12];
     
     ghost.rightLeg2.rotation.x = intkey[13];
+    ghost2.rightLeg2.rotation.x = intkey[13];
     ghost.rightLeg2.rotation.z = intkey[14];
+    ghost2.rightLeg2.rotation.z = intkey[14];
     
     ghost.leftLeg.rotation.x = intkey[15];
-      ghost.leftLeg.rotation.z = intkey[16];
+    ghost2.leftLeg.rotation.x = intkey[15];
+    ghost.leftLeg.rotation.z = intkey[16];
+    ghost2.leftLeg.rotation.z = intkey[16];
     
     ghost.leftLeg2.rotation.x = intkey[17];
+    ghost2.leftLeg2.rotation.x = intkey[17];
     ghost.leftLeg2.rotation.z = intkey[18];
+    ghost2.leftLeg2.rotation.z = intkey[18];
     
     }
       
@@ -1701,21 +1873,49 @@ function init() {
     function progress(){
       var loader = new THREE.FontLoader();
       loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
-
-          var text = 'Time 1 2';
+        if(Math.floor(clock.getElapsedTime() * 10 / 36) < 10){
+          var text = "    " + Math.floor(clock.getElapsedTime() * 10 / 36) + "%";
+        }
+        else if(Math.floor(clock.getElapsedTime() * 10 / 36) < 100){
+          var text = "  " + Math.floor(clock.getElapsedTime() * 10 / 36) + "%";
+        }
+        else var text = '100%';
           var geometry = new THREE.TextGeometry(text, {
             font: font,
-            size: 5,
-            height: 3,
-            curveSegments: 2
+            size: 4,
+            height: 2.8,
+            curveSegments: 12
           });
                 
-
+      scene.remove(progresstext1);
       var material = new THREE.MeshBasicMaterial({color: 0x3db851, side: THREE.DoubleSide});
-          mesh = new THREE.Mesh( geometry, material );
-      scene.add( mesh );
-      mesh.position.set(-70, 45, -75);
-      mesh.rotation.y += Math.PI/4;
+      progresstext1 = new THREE.Mesh( geometry, material );
+      scene.add( progresstext1 );
+      progresstext1.position.set(-75, 45, -70);
+      progresstext1.rotation.y += Math.PI/4;
+      })
+
+      loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
+      var text = "";
+      if(Progressnow <= 100){
+        for(var i = 0; i < Math.floor(Progressnow * 14 / 100); i++){
+          text += "l";
+        }
+      }
+      else text = "llllllllllllll";
+      var geometry = new THREE.TextGeometry(text, {
+        font: font,
+        size: 3.9,
+        height: 2.8,
+        curveSegments: 12
+      });
+            
+      scene.remove(progresstext2);
+      var material = new THREE.MeshBasicMaterial({color: 0x3db851, side: THREE.DoubleSide});
+      progresstext2 = new THREE.Mesh( geometry, material );
+      scene.add( progresstext2 );
+      progresstext2.position.set(-78.2, 39, -66.8);
+      progresstext2.rotation.y += Math.PI/4;
       })
 
 
@@ -1842,7 +2042,7 @@ function init() {
               if (backkeys[i2][0] > s2) break;
             }
 
-                    console.log(i2);
+                    //console.log(i2);
 
                     var ii2 = i2 - 1;
                     if(i2 === 6)i2 = 0;
@@ -2100,22 +2300,130 @@ function init() {
 
     function onDocumentKeyDown(event) {
 	  var keyCode = event.which;
-	  // 
-	  if (keyCode == 65) {
+    ////////////// I/O
+	  if (keyCode == 73) {
       condict=1;
     }
-    else if (keyCode == 83){
-      condict=0;
-    }
-    else if (keyCode == 68){
+    else if (keyCode == 79){
       condict=2;
     }
 	}
 
 
+function update(dt) {
 
+  keyboard.update();
+  if ( keyboard.pressed("A") ) {
+    camera.getWorldDirection(test);
+    camera.position.x += test.z;
+    camera.position.z -= test.x;
 
+    if(camera.position.x > 80.01) camera.position.x = 80;
+    if(camera.position.x < -80.01) camera.position.x = -80;
+    if(camera.position.z > 40) camera.position.z = 40;
+    if(camera.position.x <= 50 && camera.position.x >= -50){
+      if(camera.position.z < -45) camera.position.z = -45;   
+    }
+    if(camera.position.x >= 50 && camera.position.x <= 70){
+        var tmp = -45 + (camera.position.x - 50) * 1.8;
+        if(camera.position.z < tmp) camera.position.z = tmp;
+    }
+    if(camera.position.x >= 70 && camera.position.x <= 80){
+        if(camera.position.z < -9) camera.position.z = -9;
+    }
+    if(camera.position.x <= -50 && camera.position.x >= -70){
+        var tmp = -45 + (-camera.position.x - 50) * 1.8;
+        if(camera.position.z < tmp) camera.position.z = tmp;
+    }
+    if(camera.position.x <= -70 && camera.position.x >= -80){
+        if(camera.position.z < -9) camera.position.z = -9;
+    }
+    
+  }
 
+  if ( keyboard.pressed("D") ){
+    camera.getWorldDirection(test);
+    camera.position.x -= test.z;
+    camera.position.z += test.x;
+    
+    if(camera.position.x > 80.01) camera.position.x = 80;
+    if(camera.position.x < -80.01) camera.position.x = -80;
+    if(camera.position.z > 40) camera.position.z = 40;
+    if(camera.position.x <= 50 && camera.position.x >= -50){
+      if(camera.position.z < -45) camera.position.z = -45;   
+    }
+    if(camera.position.x >= 50 && camera.position.x <= 70){
+        var tmp = -45 + (camera.position.x - 50) * 1.8;
+        if(camera.position.z < tmp) camera.position.z = tmp;
+    }
+    if(camera.position.x >= 70 && camera.position.x <= 80){
+        if(camera.position.z < -9) camera.position.z = -9;
+    }
+    if(camera.position.x <= -50 && camera.position.x >= -70){
+        var tmp = -45 + (-camera.position.x - 50) * 1.8;
+        if(camera.position.z < tmp) camera.position.z = tmp;
+    }
+    if(camera.position.x <= -70 && camera.position.x >= -80){
+        if(camera.position.z < -9) camera.position.z = -9;
+    }
+
+  }
+  if ( keyboard.pressed("W") ){
+    camera.getWorldDirection(test);
+    camera.position.x += test.x;
+    camera.position.z += test.z;
+
+    if(camera.position.x > 80.01) camera.position.x = 80;
+    if(camera.position.x < -80.01) camera.position.x = -80;
+    if(camera.position.z > 40) camera.position.z = 40;
+    if(camera.position.x <= 50 && camera.position.x >= -50){
+      if(camera.position.z < -45) camera.position.z = -45;   
+    }
+    if(camera.position.x >= 50 && camera.position.x <= 70){
+        var tmp = -45 + (camera.position.x - 50) * 1.8;
+        if(camera.position.z < tmp) camera.position.z = tmp;
+    }
+    if(camera.position.x >= 70 && camera.position.x <= 80){
+        if(camera.position.z < -9) camera.position.z = -9;
+    }
+    if(camera.position.x <= -50 && camera.position.x >= -70){
+        var tmp = -45 + (-camera.position.x - 50) * 1.8;
+        if(camera.position.z < tmp) camera.position.z = tmp;
+    }
+    if(camera.position.x <= -70 && camera.position.x >= -80){
+        if(camera.position.z < -9) camera.position.z = -9;
+    }
+    
+  }
+  if ( keyboard.pressed("S") ){
+    camera.getWorldDirection(test);
+    camera.position.x -= test.x;
+    camera.position.z -= test.z;
+    
+    if(camera.position.x > 80.01) camera.position.x = 80;
+    if(camera.position.x < -80.01) camera.position.x = -80;
+    if(camera.position.z > 40) camera.position.z = 40;
+    if(camera.position.x <= 50 && camera.position.x >= -50){
+      if(camera.position.z < -45) camera.position.z = -45;   
+    }
+    if(camera.position.x >= 50 && camera.position.x <= 70){
+        var tmp = -45 + (camera.position.x - 50) * 1.8;
+        if(camera.position.z < tmp) camera.position.z = tmp;
+    }
+    if(camera.position.x >= 70 && camera.position.x <= 80){
+        if(camera.position.z < -9) camera.position.z = -9;
+    }
+    if(camera.position.x <= -50 && camera.position.x >= -70){
+        var tmp = -45 + (-camera.position.x - 50) * 1.8;
+        if(camera.position.z < tmp) camera.position.z = tmp;
+    }
+    if(camera.position.x <= -70 && camera.position.x >= -80){
+        if(camera.position.z < -9) camera.position.z = -9;
+    }
+
+  }
+
+}
 
 
 
@@ -2275,7 +2583,19 @@ function init() {
       Rmonitor3.position.set(-70, 45, -75);
       Rmonitor3.rotation.y += Math.PI/4 ;
       sceneRTT.add(Rmonitor3);
-      
+
+      if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/S1ilknr.png');
+      else var texture = new THREE.TextureLoader().load('tex/progressline.png');
+
+      var texMat = new THREE.MeshBasicMaterial({
+        map: texture
+      });
+
+      var geometry = new THREE.BoxGeometry(29, 19, 5 );
+      var progressline = new THREE.Mesh(geometry, texMat);
+      scene.add(progressline);
+      progressline.position.z += 0.1;
+      monitor3.add(progressline);
       
       
       
@@ -2648,7 +2968,7 @@ function init() {
       scene.add(rightwall);
       rightwall.position.set(100, 60, 0);
       */
-      var geometry = new THREE.BoxGeometry(5, wallheight ,100);
+      var geometry = new THREE.BoxGeometry(5, wallheight ,90);
       
       if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/nwTSw4l.png');
       else var texture = new THREE.TextureLoader().load('tex/wall03.png');
@@ -2658,15 +2978,15 @@ function init() {
       });
       
       var rightwall = new THREE.Mesh(geometry, texMat);
-      rightwall.position.set(100, wallheight / 2 - 10, 50);
+      rightwall.position.set(100, wallheight / 2 - 10, 55);
       scene.add(rightwall);
 
       var Rrightwall = new THREE.Mesh(geometry, texMat);
-      Rrightwall.position.set(100, wallheight / 2 - 10, 50);
+      Rrightwall.position.set(100, wallheight / 2 - 10, 55);
       sceneRTT.add(Rrightwall);
 
       
-      var geometry = new THREE.BoxGeometry(5, wallheight ,100);
+      var geometry = new THREE.BoxGeometry(5, wallheight ,90);
       
       if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/gIqf5Lb.png');
       else var texture = new THREE.TextureLoader().load('tex/wall04.png');
@@ -2676,16 +2996,16 @@ function init() {
       });
       
       var leftwall = new THREE.Mesh(geometry, texMat);
-      leftwall.position.set(-100, wallheight / 2 - 10, 50);
+      leftwall.position.set(-100, wallheight / 2 - 10, 55);
       scene.add(leftwall);
 
       var Rleftwall = new THREE.Mesh(geometry, texMat);
-      Rleftwall.position.set(-100, wallheight / 2 - 10, 50);
+      Rleftwall.position.set(-100, wallheight / 2 - 10, 55);
       sceneRTT.add(Rleftwall);
 
 
       
-      var geometry = new THREE.BoxGeometry(5, wallheight, 100 - Dsize);
+      var geometry = new THREE.BoxGeometry(5, wallheight, 100 - Dsize + 10);
       
       if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/2nQfXeF.png');
       else var texture = new THREE.TextureLoader().load('tex/wall05.png');
@@ -2695,11 +3015,11 @@ function init() {
       });
       
       var rightwall2 = new THREE.Mesh(geometry, texMat);
-      rightwall2.position.set(100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2);
+      rightwall2.position.set(100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2 + 5);
       scene.add(rightwall2);
 
       var Rrightwall2 = new THREE.Mesh(geometry, texMat);
-      Rrightwall2.position.set(100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2);
+      Rrightwall2.position.set(100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2 + 5);
       sceneRTT.add(Rrightwall2);
 
 
@@ -2712,11 +3032,11 @@ function init() {
       });
       
       var leftwall2 = new THREE.Mesh(geometry, texMat);
-      leftwall2.position.set(-100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2);
+      leftwall2.position.set(-100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2 + 5);
       scene.add(leftwall2);
 
       var Rleftwall2 = new THREE.Mesh(geometry, texMat);
-      Rleftwall2.position.set(-100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2);
+      Rleftwall2.position.set(-100, wallheight / 2 - 10, -100 + (100 - Dsize) / 2 + 5);
       sceneRTT.add(Rleftwall2);
 
 
@@ -2994,10 +3314,11 @@ function init() {
       event.preventDefault();
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       //mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      
       if (mouse.x > 0.3 && viewpoint == 1) rotationy = (mouse.x - 0.3) * 2;
       else if (mouse.x < -0.3 && viewpoint == 1) rotationy = (mouse.x + 0.3) * 2;
       else rotationy = 0;
-
+      
 
     }
 
@@ -3170,17 +3491,82 @@ function init() {
       var camerarotate = new THREE.Vector3();
       camera.getWorldDirection(camerarotate);
       //console.log('c.z = '+camerarotate.z+' x ='+x+' c.x = '+camerarotate.x);
+      camera.rotation.y -= x / 50;
+      /*
       if (viewpoint != 1) rotationy = 0;
       else if (quickswitch == 0 && camerarotate.z < -0.2) camera.rotation.y -= x / 100;
       else if (camerarotate.z < -0.2) camera.rotation.y += x / 100;
       else if (camerarotate.z < -0.1 && x > 0 && camerarotate.x < 0) camera.rotation.y -= x / 100;
       else if (camerarotate.z < -0.1 && x < 0 && camerarotate.x > 0) camera.rotation.y -= x / 100;
+      */
     }
 
 
 
     function makeoutside() {
       var loader = new THREE.TextureLoader();
+
+      if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/DrvlmNW.jpg');
+      else var texture = new THREE.TextureLoader().load('tex/upfloor.jpeg');
+
+      texture.repeat.set(2, 2);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+
+      var plane = new THREE.Mesh(new THREE.PlaneGeometry(205, 205),
+        new THREE.MeshPhongMaterial({
+          map: texture
+      }))
+
+      plane.rotation.x = +Math.PI / 2;
+      scene.add(plane);
+      plane.position.set(-100,100.1,0);
+
+      var plane2 = new THREE.Mesh(new THREE.PlaneGeometry(205, 205),
+        new THREE.MeshPhongMaterial({
+          map: texture
+      }))
+
+      plane2.rotation.x = +Math.PI / 2;
+      scene.add(plane2);
+      plane2.position.set(-100,100.1,-200);
+
+      var plane3 = new THREE.Mesh(new THREE.PlaneGeometry(205, 205),
+        new THREE.MeshPhongMaterial({
+          map: texture
+      }))
+
+      plane3.rotation.x = +Math.PI / 2;
+      scene.add(plane3);
+      plane3.position.set(-100,100.1,-400);
+
+      var plane4 = new THREE.Mesh(new THREE.PlaneGeometry(205, 205),
+        new THREE.MeshPhongMaterial({
+          map: texture
+      }))
+
+      plane4.rotation.x = +Math.PI / 2;
+      scene.add(plane4);
+      plane4.position.set(100,100.1,0);
+
+      var plane5 = new THREE.Mesh(new THREE.PlaneGeometry(205, 205),
+        new THREE.MeshPhongMaterial({
+          map: texture
+      }))
+
+      plane5.rotation.x = +Math.PI / 2;
+      scene.add(plane5);
+      plane5.position.set(100,100.1,-200);
+
+      var plane6 = new THREE.Mesh(new THREE.PlaneGeometry(205, 205),
+        new THREE.MeshPhongMaterial({
+          map: texture
+      }))
+
+      plane6.rotation.x = +Math.PI / 2;
+      scene.add(plane6);
+      plane6.position.set(100,100.1,-400);
+
 
       if(Islocal != 1) var texture = new THREE.TextureLoader().load('https://i.imgur.com/FM8caZz.jpg');
       else var texture = new THREE.TextureLoader().load('tex/outsidefloor.jpg');
