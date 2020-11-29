@@ -66,6 +66,7 @@
 		var controls, stats, clock, ghost, ghost2, gui, t = 0, t2 = 0, gControl, steps, keys = [], backkeys = [] ,intkey = [], backintkey = [], move, buildMove;//鬼
 		var T = 0.7, T2= 0.7,ready = 0; 
 		var clock = new THREE.Clock();
+	var playerclock = new THREE.Clock();
     var progressclock
 		var ts = clock.getElapsedTime(), ts2 = clock.getElapsedTime();
     var playerpositionbox, playerT = 448/112, playerintKey = [], playerintKey2 = [], playerintKey3 = [], playerlarm, playerrarm, playerts = clock.getElapsedTime(), playerstate = 0;
@@ -2024,17 +2025,17 @@ function init() {
       renderer.render(scene, camera);
       //renderer.render(sceneHUD, cameraHUD);
       if(playerstate == 1){
-        playerkeyframe(clock.getElapsedTime());
+        playerkeyframe(playerclock.getElapsedTime());
         playerlarm.rotation.y = playerintKey[0]
         playerrarm.rotation.y = playerintKey[1]
       }
       else if(playerstate == 2){
-        playerkeyframe2(clock.getElapsedTime());
+        playerkeyframe2(playerclock.getElapsedTime());
         playerlarm.rotation.y = playerintKey2[0]
         playerrarm.rotation.y = playerintKey2[1]
       }
       else if(playerstate == 0){
-        playerkeyframe3(clock.getElapsedTime());
+        playerkeyframe3(playerclock.getElapsedTime());
         playerlarm.rotation.y = playerintKey3[0]
         playerrarm.rotation.y = playerintKey3[1]
       }
