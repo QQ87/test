@@ -57,16 +57,18 @@
     var Rdininglight, Rstagelight, Rkitchenlight, Rstoreroomlight, Rrestroomlight, Rcounterlight, Rroomlight;
     var Progressnow;
     var cameraauto = 0 , cameraautoflag = 0;
-    var camerabox, camerastick, CAM = 6, progresstext1, progresstext2;
+    var camerabox, camerastick, CAM = 6, progresstext1, progresstext2, starttext, startflag = 1, isranged = 0, keyboarding = 0, gamestart = 0, progressline, controling = 0, standup = 1, undertable = 0, canentertable = 0;
     var condict=0;
-
+    
     var movingstep=1, block=1,mov=0, rdoor=false,ldoor=false,movcor=0,wdoor=false; // ghost moving variable
 
 
 		var controls, stats, clock, ghost, ghost2, gui, t = 0, t2 = 0, gControl, steps, keys = [], backkeys = [] ,intkey = [], backintkey = [], move, buildMove;//鬼
 		var T = 0.7, T2= 0.7,ready = 0; 
 		var clock = new THREE.Clock();
+    var progressclock
 		var ts = clock.getElapsedTime(), ts2 = clock.getElapsedTime();
+    var playerpositionbox, playerT = 448/112, playerintKey = [], playerintKey2 = [], playerintKey3 = [], playerlarm, playerrarm, playerts = clock.getElapsedTime(), playerstate = 0;
     var thebox,sound;//soundbox
 		var on=0;
     var meshMaterial;
@@ -914,6 +916,182 @@
 
 
 
+    var playerpose1 = {
+      theta1: 1,
+      theta2: 1.1
+    }
+    var playerpose2 = {
+      theta1: 1.2,
+      theta2: 1
+    }
+    var playerpose3 = {
+      theta1: 0.9,
+      theta2: 1.3
+    }
+    var playerpose4 = {
+      theta1: 1.2,
+      theta2: 1.1
+    }
+    var playerpose5 = {
+      theta1: 1.4,
+      theta2: 0.9
+    }
+    var playerpose6 = {
+      theta1: 1,
+      theta2: 1
+    }
+    var playerpose7 = {
+      theta1: 0.9,
+      theta2: 1.2
+    }
+    var playerpose8 = {
+      theta1: 1.2,
+      theta2: 1
+    }
+    var playerpose9 = {
+      theta1: 1,
+      theta2: 1
+    }
+    var playerpose10 = {
+      theta1: 1,
+      theta2: 1.2
+    }
+
+
+    var playerkeys = [
+
+      [0, playerpose1],
+      [0.1, playerpose2],
+      [0.2, playerpose3],
+      [0.3, playerpose4],
+      [0.4, playerpose5],
+      [0.5, playerpose6],
+      [0.6, playerpose7],
+      [0.7, playerpose8],
+      [0.8,playerpose9],
+      [0.9,playerpose10],
+      [1, playerpose1]
+      
+    ];
+
+    function playerkeyframe(playert) {
+      var s = ((playert - playerts) % playerT) / playerT;
+
+      for (var i = 1; i < playerkeys.length; i++) {
+        if (playerkeys[i][0] > s) break;
+      }
+      // take i-1
+      var ii = i - 1;
+      var a = (s - playerkeys[ii][0]) / (playerkeys[ii + 1][0] - playerkeys[ii][0]);
+      playerintKey = [playerkeys[ii][1].theta1 * (1 - a) + playerkeys[ii + 1][1].theta1 * a,
+                playerkeys[ii][1].theta2 * (1 - a) + playerkeys[ii + 1][1].theta2 * a        
+      ];
+
+    }
+
+
+
+    var playerpose21 = {
+      theta1: 0,
+      theta2: 0
+    }
+    var playerpose22 = {
+      theta1: 1.3,
+      theta2: -1.3
+    }
+    var playerpose23 = {
+      theta1: 0,
+      theta2: 0
+    }
+    var playerpose24 = {
+      theta1: -1.3,
+      theta2: 1.3
+    }
+    var playerpose25 = {
+      theta1: 0,
+      theta2: 0
+    }
+    var playerpose26 = {
+      theta1: 1.3,
+      theta2: -1.3
+    }
+    var playerpose27 = {
+      theta1: 0,
+      theta2: 0
+    }
+    var playerpose28 = {
+      theta1: -1.3,
+      theta2: 1.3
+    }
+    var playerpose29 = {
+      theta1: 0,
+      theta2: 0
+    }
+
+
+    var playerkeys2 = [
+
+      [0, playerpose21],
+      [0.125, playerpose22],
+      [0.25, playerpose23],
+      [0.375, playerpose24],
+      [0.5, playerpose25],
+      [0.675, playerpose26],
+      [0.75, playerpose27],
+      [0.875, playerpose28],
+      [1, playerpose29]
+      
+    ];
+
+    function playerkeyframe2(playert) {
+      var s = ((playert - playerts) % playerT) / playerT;
+
+      for (var i = 1; i < playerkeys2.length; i++) {
+        if (playerkeys2[i][0] > s) break;
+      }
+      // take i-1
+      var ii = i - 1;
+      var a = (s - playerkeys2[ii][0]) / (playerkeys2[ii + 1][0] - playerkeys2[ii][0]);
+      playerintKey2 = [playerkeys2[ii][1].theta1 * (1 - a) + playerkeys2[ii + 1][1].theta1 * a,
+                playerkeys2[ii][1].theta2 * (1 - a) + playerkeys2[ii + 1][1].theta2 * a        
+      ];
+
+    }
+
+
+
+    var playerpose31 = {
+      theta1: 0,
+      theta2: 0
+    }
+    var playerpose32 = {
+      theta1: 0,
+      theta2: 0
+    }
+
+
+    var playerkeys3 = [
+
+      [0, playerpose31],
+      [1, playerpose32],
+    ];
+
+    function playerkeyframe3(playert) {
+      var s = ((playert - playerts) % playerT) / playerT;
+
+      for (var i = 1; i < playerkeys3.length; i++) {
+        if (playerkeys3[i][0] > s) break;
+      }
+      // take i-1
+      var ii = i - 1;
+      var a = (s - playerkeys3[ii][0]) / (playerkeys3[ii + 1][0] - playerkeys3[ii][0]);
+      playerintKey3 = [playerkeys3[ii][1].theta1 * (1 - a) + playerkeys3[ii + 1][1].theta1 * a,
+                playerkeys3[ii][1].theta2 * (1 - a) + playerkeys3[ii + 1][1].theta2 * a        
+      ];
+
+    }
+
+
 
 
 
@@ -1309,17 +1487,16 @@ function init() {
 
       makemap();
 
-
       
       
       camera.position.set(0,40,0);
       camera.lookAt(0, 40, -120);
 
-
+/*
       Progressnow = 0;
       var loader = new THREE.FontLoader();
       loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
-        if(Math.floor(clock.getElapsedTime() * 10 / 36) < 10) var text = "    " + Math.floor(clock.getElapsedTime() * 10 / 36) + "%";
+        if(Math.floor(progressclock.getElapsedTime() * 10 / 36) < 10) var text = "    " + Math.floor(progressclock.getElapsedTime() * 10 / 36) + "%";
         else var text = '0%';
           var geometry = new THREE.TextGeometry(text, {
             font: font,
@@ -1353,6 +1530,57 @@ function init() {
       progresstext2.position.set(-78.2, 39, -66.8);
       progresstext2.rotation.y += Math.PI/4;
       })
+
+
+*/
+
+
+      
+
+
+      
+      var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+      var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+      playerpositionbox = new THREE.Mesh( geometry, material );
+
+      var loader = new THREE.FontLoader();
+      loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
+        var text = 'Press "E" to start backup';
+          var geometry = new THREE.TextGeometry(text, {
+            font: font,
+            size: 0.5,
+            height: 0.01,
+            curveSegments: 12
+          });
+                
+
+      var material = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide});
+      starttext = new THREE.Mesh( geometry, material );
+      playerpositionbox.add (starttext);
+      starttext.position.set(-4, 37, -1000);
+      })
+      
+
+      playerlarm = makeArm();
+      playerpositionbox.add (playerlarm);
+      playerlarm.position.set (1.26*5+0.62*5, 7.57*5, 0);
+      playerlarm.rotation.z = -Math.PI/2;
+      ///////////////////////////
+      playerrarm = makeArm();
+      playerpositionbox.add (playerrarm);
+      playerrarm.position.set (-(1.26*5+0.62*5), 7.57*5, 0);
+      playerrarm.rotation.z = -Math.PI/2;
+
+      playerlarm.rotation.order = 'ZYX';
+      playerrarm.rotation.order = 'ZYX';
+
+      scene.add( playerpositionbox );
+      playerpositionbox.position.set(0,0,0);
+
+
+
+
+      
 
 
       /*
@@ -1773,10 +2001,12 @@ function init() {
       /////////////////////////////////////////////////////////////////////// set origin position
       requestAnimationFrame(animate);
       //render();
-      if(Math.floor(clock.getElapsedTime() * 10 / 36) != Progressnow && Progressnow <= 100){
-        Progressnow = Math.floor(clock.getElapsedTime() * 10 / 36);
-        progress();
-      }  
+      if(gamestart == 1){
+        if(Math.floor(progressclock.getElapsedTime() * 10 / 36) != Progressnow && Progressnow <= 100){
+          Progressnow = Math.floor(progressclock.getElapsedTime() * 10 / 36);
+          progress();
+        }  
+      }
       camerarotation(rotationy);
       var dt = clock.getDelta();
       update(dt);
@@ -1793,6 +2023,41 @@ function init() {
       renderer.setClearColor(0x888888);
       renderer.render(scene, camera);
       //renderer.render(sceneHUD, cameraHUD);
+      if(playerstate == 1){
+        playerkeyframe(clock.getElapsedTime());
+        playerlarm.rotation.y = playerintKey[0]
+        playerrarm.rotation.y = playerintKey[1]
+      }
+      else if(playerstate == 2){
+        playerkeyframe2(clock.getElapsedTime());
+        playerlarm.rotation.y = playerintKey2[0]
+        playerrarm.rotation.y = playerintKey2[1]
+      }
+      else if(playerstate == 0){
+        playerkeyframe3(clock.getElapsedTime());
+        playerlarm.rotation.y = playerintKey3[0]
+        playerrarm.rotation.y = playerintKey3[1]
+      }
+      if(keyboarding == 0) playerstate = 0;
+      
+      if(playerpositionbox.position.x <= -30 && camera.position.x >= -65 && startflag == 1){
+        if(playerpositionbox.position.z >= -45 && camera.position.z <= -30 && startflag == 1 && controling == 0 && standup == 1){
+          starttext.position.set(-4, 37, -10);
+          isranged = 1;
+        }   
+        else{
+          starttext.position.set(-4, 37, -1000);
+          isranged = 0;
+        }
+      }
+      else {
+          starttext.position.set(-4, 37, -1000);
+          isranged = 0;
+      }
+
+
+
+
         
         
       t += clock.getDelta();
@@ -1873,11 +2138,11 @@ function init() {
     function progress(){
       var loader = new THREE.FontLoader();
       loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
-        if(Math.floor(clock.getElapsedTime() * 10 / 36) < 10){
-          var text = "    " + Math.floor(clock.getElapsedTime() * 10 / 36) + "%";
+        if(Math.floor(progressclock.getElapsedTime() * 10 / 36) < 10){
+          var text = "    " + Math.floor(progressclock.getElapsedTime() * 10 / 36) + "%";
         }
-        else if(Math.floor(clock.getElapsedTime() * 10 / 36) < 100){
-          var text = "  " + Math.floor(clock.getElapsedTime() * 10 / 36) + "%";
+        else if(Math.floor(progressclock.getElapsedTime() * 10 / 36) < 100){
+          var text = "  " + Math.floor(progressclock.getElapsedTime() * 10 / 36) + "%";
         }
         else var text = '100%';
           var geometry = new THREE.TextGeometry(text, {
@@ -2307,121 +2572,328 @@ function init() {
     else if (keyCode == 79){
       condict=2;
     }
+    else if(keyCode == 17 && controling == 0){
+      if(standup == 0 && playerpositionbox.position.z <= 40){
+        standup = 1;
+        controling = 1;
+        controlpressed();
+      }
+      else if(standup == 1){
+        standup = 0;
+        controling = 1;
+        controlpressed();
+      }
+    }
+    else if(keyCode == 17 && controling == 1){
+      if(standup == 0) standup = 1;
+      else standup = 0;
+    }
 	}
 
 
 function update(dt) {
-
+  
   keyboard.update();
   if ( keyboard.pressed("A") ) {
+    playerstate = 2;
     camera.getWorldDirection(test);
     camera.position.x += test.z;
     camera.position.z -= test.x;
+    playerpositionbox.position.x += test.z;
+    playerpositionbox.position.z -= test.x;
 
-    if(camera.position.x > 80.01) camera.position.x = 80;
-    if(camera.position.x < -80.01) camera.position.x = -80;
-    if(camera.position.z > 40) camera.position.z = 40;
+
+    if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
+    else canentertable = 0;
+
+    if(canentertable == 1){ 
+      if(camera.position.z > 45) undertable = 1;
+      else undertable = 0;
+      if(camera.position.z > 80){
+        camera.position.z = 80;
+        playerpositionbox.position.z = 80;
+      }   
+    }
+    else undertable = 0;
+
+    if(camera.position.z > 40 && canentertable == 0){
+      camera.position.z = 40;
+      playerpositionbox.position.z = 40;
+    } 
+
+    if(canentertable == 1 && camera.position.z > 40){
+      if(camera.position.x > 29){
+        camera.position.x = 29;
+        playerpositionbox.position.x = 29;
+      }
+      else if(camera.position.x < -29){
+        camera.position.x = -29;
+        playerpositionbox.position.x = -29;
+      }
+    }
+
+
+
+
+    if(camera.position.x > 80.01){
+      camera.position.x = 80;
+      playerpositionbox.position.x = 80;
+    }
+    if(camera.position.x < -80.01){
+      camera.position.x = -80;
+      playerpositionbox.position.x = -80;
+    }
     if(camera.position.x <= 50 && camera.position.x >= -50){
-      if(camera.position.z < -45) camera.position.z = -45;   
+      if(camera.position.z < -45) camera.position.z = -45; 
+      if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
     }
     if(camera.position.x >= 50 && camera.position.x <= 70){
         var tmp = -45 + (camera.position.x - 50) * 1.8;
         if(camera.position.z < tmp) camera.position.z = tmp;
+        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
     }
     if(camera.position.x >= 70 && camera.position.x <= 80){
         if(camera.position.z < -9) camera.position.z = -9;
+        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
     }
     if(camera.position.x <= -50 && camera.position.x >= -70){
         var tmp = -45 + (-camera.position.x - 50) * 1.8;
         if(camera.position.z < tmp) camera.position.z = tmp;
+        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
     }
     if(camera.position.x <= -70 && camera.position.x >= -80){
         if(camera.position.z < -9) camera.position.z = -9;
+        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
     }
+
+    
+    
     
   }
 
-  if ( keyboard.pressed("D") ){
+  else if ( keyboard.pressed("D") ){
+    playerstate = 2;
     camera.getWorldDirection(test);
     camera.position.x -= test.z;
     camera.position.z += test.x;
-    
-    if(camera.position.x > 80.01) camera.position.x = 80;
-    if(camera.position.x < -80.01) camera.position.x = -80;
-    if(camera.position.z > 40) camera.position.z = 40;
+    playerpositionbox.position.x -= test.z;
+    playerpositionbox.position.z += test.x;
+
+    if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
+    else canentertable = 0;
+
+    if(canentertable == 1){ 
+      if(camera.position.z > 45) undertable = 1;
+      else undertable = 0;
+      if(camera.position.z > 80){
+        camera.position.z = 80;
+        playerpositionbox.position.z = 80;
+      }   
+    }
+    else undertable = 0;
+
+    if(camera.position.z > 40 && canentertable == 0){
+      camera.position.z = 40;
+      playerpositionbox.position.z = 40;
+    } 
+
+    if(canentertable == 1 && camera.position.z > 40){
+      if(camera.position.x > 29){
+        camera.position.x = 29;
+        playerpositionbox.position.x = 29;
+      }
+      else if(camera.position.x < -29){
+        camera.position.x = -29;
+        playerpositionbox.position.x = -29;
+      }
+    }
+
+
+
+    if(camera.position.x > 80.01){
+      camera.position.x = 80;
+      playerpositionbox.position.x = 80;
+    }
+    if(camera.position.x < -80.01){
+      camera.position.x = -80;
+      playerpositionbox.position.x = -80;
+    }
     if(camera.position.x <= 50 && camera.position.x >= -50){
-      if(camera.position.z < -45) camera.position.z = -45;   
+      if(camera.position.z < -45) camera.position.z = -45; 
+      if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
     }
     if(camera.position.x >= 50 && camera.position.x <= 70){
         var tmp = -45 + (camera.position.x - 50) * 1.8;
         if(camera.position.z < tmp) camera.position.z = tmp;
+        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
     }
     if(camera.position.x >= 70 && camera.position.x <= 80){
         if(camera.position.z < -9) camera.position.z = -9;
+        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
     }
     if(camera.position.x <= -50 && camera.position.x >= -70){
         var tmp = -45 + (-camera.position.x - 50) * 1.8;
         if(camera.position.z < tmp) camera.position.z = tmp;
+        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
     }
     if(camera.position.x <= -70 && camera.position.x >= -80){
         if(camera.position.z < -9) camera.position.z = -9;
+        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
     }
 
   }
-  if ( keyboard.pressed("W") ){
+  else if ( keyboard.pressed("W") ){
+    playerstate = 2;
     camera.getWorldDirection(test);
     camera.position.x += test.x;
     camera.position.z += test.z;
+    playerpositionbox.position.x += test.x;
+    playerpositionbox.position.z += test.z;
 
-    if(camera.position.x > 80.01) camera.position.x = 80;
-    if(camera.position.x < -80.01) camera.position.x = -80;
-    if(camera.position.z > 40) camera.position.z = 40;
+    if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
+    else canentertable = 0;
+
+    if(canentertable == 1){ 
+      if(camera.position.z > 45) undertable = 1;
+      else undertable = 0;
+      if(camera.position.z > 80){
+        camera.position.z = 80;
+        playerpositionbox.position.z = 80;
+      }   
+    }
+    else undertable = 0;
+
+    if(camera.position.z > 40 && canentertable == 0){
+      camera.position.z = 40;
+      playerpositionbox.position.z = 40;
+    } 
+
+    if(canentertable == 1 && camera.position.z > 40){
+      if(camera.position.x > 29){
+        camera.position.x = 29;
+        playerpositionbox.position.x = 29;
+      }
+      else if(camera.position.x < -29){
+        camera.position.x = -29;
+        playerpositionbox.position.x = -29;
+      }
+    }
+
+    if(camera.position.x > 80.01){
+      camera.position.x = 80;
+      playerpositionbox.position.x = 80;
+    }
+    if(camera.position.x < -80.01){
+      camera.position.x = -80;
+      playerpositionbox.position.x = -80;
+    }
     if(camera.position.x <= 50 && camera.position.x >= -50){
-      if(camera.position.z < -45) camera.position.z = -45;   
+      if(camera.position.z < -45) camera.position.z = -45; 
+      if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
     }
     if(camera.position.x >= 50 && camera.position.x <= 70){
         var tmp = -45 + (camera.position.x - 50) * 1.8;
         if(camera.position.z < tmp) camera.position.z = tmp;
+        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
     }
     if(camera.position.x >= 70 && camera.position.x <= 80){
         if(camera.position.z < -9) camera.position.z = -9;
+        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
     }
     if(camera.position.x <= -50 && camera.position.x >= -70){
         var tmp = -45 + (-camera.position.x - 50) * 1.8;
         if(camera.position.z < tmp) camera.position.z = tmp;
+        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
     }
     if(camera.position.x <= -70 && camera.position.x >= -80){
         if(camera.position.z < -9) camera.position.z = -9;
+        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
     }
+
+    
     
   }
-  if ( keyboard.pressed("S") ){
+  else if ( keyboard.pressed("S") ){
+    playerstate = 2;
     camera.getWorldDirection(test);
     camera.position.x -= test.x;
     camera.position.z -= test.z;
-    
-    if(camera.position.x > 80.01) camera.position.x = 80;
-    if(camera.position.x < -80.01) camera.position.x = -80;
-    if(camera.position.z > 40) camera.position.z = 40;
+    playerpositionbox.position.x -= test.x;
+    playerpositionbox.position.z -= test.z;
+
+
+    if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
+    else canentertable = 0;
+
+    if(canentertable == 1){ 
+      if(camera.position.z > 45) undertable = 1;
+      else undertable = 0;
+      if(camera.position.z > 80){
+        camera.position.z = 80;
+        playerpositionbox.position.z = 80;
+      }   
+    }
+    else undertable = 0;
+
+    if(camera.position.z > 40 && canentertable == 0){
+      camera.position.z = 40;
+      playerpositionbox.position.z = 40;
+    } 
+
+    if(canentertable == 1 && camera.position.z > 40){
+      if(camera.position.x > 29){
+        camera.position.x = 29;
+        playerpositionbox.position.x = 29;
+      }
+      else if(camera.position.x < -29){
+        camera.position.x = -29;
+        playerpositionbox.position.x = -29;
+      }
+    }
+
+
+
+    if(camera.position.x > 80.01){
+      camera.position.x = 80;
+      playerpositionbox.position.x = 80;
+    }
+    if(camera.position.x < -80.01){
+      camera.position.x = -80;
+      playerpositionbox.position.x = -80;
+    }
     if(camera.position.x <= 50 && camera.position.x >= -50){
-      if(camera.position.z < -45) camera.position.z = -45;   
+      if(camera.position.z < -45) camera.position.z = -45; 
+      if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
     }
     if(camera.position.x >= 50 && camera.position.x <= 70){
         var tmp = -45 + (camera.position.x - 50) * 1.8;
         if(camera.position.z < tmp) camera.position.z = tmp;
+        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
     }
     if(camera.position.x >= 70 && camera.position.x <= 80){
         if(camera.position.z < -9) camera.position.z = -9;
+        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
     }
     if(camera.position.x <= -50 && camera.position.x >= -70){
         var tmp = -45 + (-camera.position.x - 50) * 1.8;
         if(camera.position.z < tmp) camera.position.z = tmp;
+        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
     }
     if(camera.position.x <= -70 && camera.position.x >= -80){
         if(camera.position.z < -9) camera.position.z = -9;
+        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
     }
 
   }
+  else if ( keyboard.pressed("E") ) {
+    if(isranged == 1){
+      playerstate = 1;
+      keyboarding = 1;
+      startflag = 0;
+      setTimeout(playerstate1timeout,3000);
+    } 
+  }
+  
 
 }
 
@@ -2592,9 +3064,9 @@ function update(dt) {
       });
 
       var geometry = new THREE.BoxGeometry(29, 19, 5 );
-      var progressline = new THREE.Mesh(geometry, texMat);
+      progressline = new THREE.Mesh(geometry, texMat);
       scene.add(progressline);
-      progressline.position.z += 0.1;
+      progressline.position.z -= 0.1;
       monitor3.add(progressline);
       
       
@@ -3492,6 +3964,7 @@ function update(dt) {
       camera.getWorldDirection(camerarotate);
       //console.log('c.z = '+camerarotate.z+' x ='+x+' c.x = '+camerarotate.x);
       camera.rotation.y -= x / 50;
+      playerpositionbox.rotation.y -= x/50;
       /*
       if (viewpoint != 1) rotationy = 0;
       else if (quickswitch == 0 && camerarotate.z < -0.2) camera.rotation.y -= x / 100;
@@ -6533,6 +7006,103 @@ function mapbuttom1(event) {
   }
   
   }
+
+  function makeArm() {
+	let loader = new THREE.TextureLoader();
+  loader.crossOrigin = '';
+  let matArray = [];
+  matArray.push(new THREE.MeshLambertMaterial({
+    map: loader.load('tex/arm1.png') // 1
+  }));
+	matArray.push(new THREE.MeshLambertMaterial({
+    map: loader.load('tex/arm2.png') // 1
+  }));
+  matArray.push(new THREE.MeshLambertMaterial({
+    map: loader.load('tex/arm3.png') // 1
+  }));
+  matArray.push(new THREE.MeshLambertMaterial({
+    map: loader.load('tex/arm3.png') // 1
+  }));
+  matArray.push(new THREE.MeshLambertMaterial({
+    map: loader.load('tex/arm3.png') // 1
+  }));
+  matArray.push(new THREE.MeshLambertMaterial({
+    map: loader.load('tex/arm4.png') // 1
+  }));
+
+
+
+	var group = new THREE.Group();
+  var body = new THREE.Mesh (new THREE.BoxGeometry(3.82*5, 1.24*5, 1.24*5), matArray);
+  
+	group.add (body);
+  body.position.x = 3.82*5/2;
+  //group.add (new THREE.AxesHelper (k));
+	return group;
+
+
+}
+
+function playerstate1timeout(){
+  keyboarding = 0;
+  playerstate = 0;
+  Progressnow = 0;
+  progressclock = new THREE.Clock();
+      var loader = new THREE.FontLoader();
+      loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
+        if(Math.floor(progressclock.getElapsedTime() * 10 / 36) < 10) var text = "    " + Math.floor(progressclock.getElapsedTime() * 10 / 36) + "%";
+        else var text = '0%';
+          var geometry = new THREE.TextGeometry(text, {
+            font: font,
+            size: 4,
+            height: 2.8,
+            curveSegments: 12
+          });
+                
+
+      var material = new THREE.MeshBasicMaterial({color: 0x3db851, side: THREE.DoubleSide});
+      progresstext1 = new THREE.Mesh( geometry, material );
+      scene.add( progresstext1 );
+      progresstext1.position.set(-75, 45, -70);
+      progresstext1.rotation.y += Math.PI/4;
+      })
+
+      loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
+
+      var text = '';   //14 is full
+      var geometry = new THREE.TextGeometry(text, {
+        font: font,
+        size: 3.9,
+        height: 2.8,
+        curveSegments: 12
+      });
+            
+
+      var material = new THREE.MeshBasicMaterial({color: 0x3db851, side: THREE.DoubleSide});
+      progresstext2 = new THREE.Mesh( geometry, material );
+      scene.add( progresstext2 );
+      progresstext2.position.set(-78.2, 39, -66.8);
+      progresstext2.rotation.y += Math.PI/4;
+      })
+    progressline.position.z += 0.2;
+    gamestart = 1;
+    
+}
+
+function controlpressed(){
+  if(standup == 0){
+    camera.position.y -= 0.4;
+    playerpositionbox.position.y -= 0.4;
+    if(camera.position.y > 20) setTimeout(controlpressed,5);
+    else controling = 0;
+  }
+  else if(standup == 1){
+    camera.position.y += 0.4;
+    playerpositionbox.position.y += 0.4;
+    if(camera.position.y < 40) setTimeout(controlpressed,5);
+    else controling = 0;
+  }
+}
 
 
 
