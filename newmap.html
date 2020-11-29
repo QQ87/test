@@ -22,6 +22,12 @@
     </style>
 </head>
 <body>
+<audio loop crossorigin="anonymous" id="Step" preload="auto" style="display: none">
+  <source src="Deep_steps.ogg" type="audio/mpeg">
+</audio>
+<audio loop crossorigin="anonymous" id="Step2" preload="auto" style="display: none">
+  <source src="Deep_steps.ogg" type="audio/mpeg">
+</audio>
 <script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
 <script type=module>
     
@@ -31,6 +37,7 @@
     import { OBJLoader } from 'https://raw.githack.com/mrdoob/three.js/dev/examples/jsm/loaders/OBJLoader.js';
     import { DDSLoader } from 'https://raw.githack.com/mrdoob/three.js/master/examples/jsm/loaders/DDSLoader.js';
     import { Gyroscope } from 'https://raw.githack.com/mrdoob/three.js/dev/examples/jsm/misc/Gyroscope.js';
+    import { PositionalAudioHelper } from 'https://raw.githack.com/mrdoob/three.js/dev/examples/jsm/helpers/PositionalAudioHelper.js';
 
     var Islocal = 1; ///圖片路徑  1 = 路徑     else = imgur
 
@@ -55,9 +62,9 @@
     var hudmap, outcameraflag = 0, car, Rcar;
     var dininglight, stagelight, kitchenlight, storeroomlight, restroomlight, counterlight, roomlight;
     var Rdininglight, Rstagelight, Rkitchenlight, Rstoreroomlight, Rrestroomlight, Rcounterlight, Rroomlight;
-    var Progressnow;
+    var Progressnow, progresstimesum = 0;
     var cameraauto = 0 , cameraautoflag = 0;
-    var camerabox, camerastick, CAM = 6, progresstext1, progresstext2, starttext, startflag = 1, isranged = 0, keyboarding = 0, gamestart = 0, progressline, controling = 0, standup = 1, undertable = 0, canentertable = 0;
+    var camerabox, camerastick, CAM = 6, progresstext1, progresstext2, starttext, startflag = 1, isranged = 0, keyboarding = 0, gamestart = 0, progressline, controling = 0, standup = 1, undertable = 0, canentertable = 0, iscanceled = 0;;
     var condict=0;
     
     var movingstep=1, block=1,mov=0, rdoor=false,ldoor=false,movcor=0,wdoor=false; // ghost moving variable
@@ -65,17 +72,18 @@
 
 		var controls, stats, clock, ghost, ghost2, gui, t = 0, t2 = 0, gControl, steps, keys = [], backkeys = [] ,intkey = [], backintkey = [], move, buildMove;//鬼
 		var T = 0.7, T2= 0.7,ready = 0; 
-		var clock = new THREE.Clock();
-	var playerclock = new THREE.Clock();
-    var progressclock
+		var clock = new THREE.Clock(),playerclock = new THREE.Clock();
+    var progressclock;
 		var ts = clock.getElapsedTime(), ts2 = clock.getElapsedTime();
-    var playerpositionbox, playerT = 448/112, playerintKey = [], playerintKey2 = [], playerintKey3 = [], playerlarm, playerrarm, playerts = clock.getElapsedTime(), playerstate = 0;
-    var thebox,sound;//soundbox
+    var playerpositionbox, playerT = 448/112, playerintKey = [], playerintKey2 = [], playerintKey3 = [], playerlarm, playerrarm, playerts = clock.getElapsedTime(), playerstate = 0, canceltext, cancelingtext;
+    var thebox,sound,audioElement,helper,thebox2,helper2,sound2,Step,Step2;//soundbox
+    playerclock = new THREE.Clock();
+
 		var on=0;
     var meshMaterial;
 
     /////////////////////// semaphone
-    var gyro,fin=0,ran=0,infloor,com=0,release=0;
+    var gyro,fin=0,ran=0,infloor,com=0,release=0,stop=0;
     var rotest;/////////// random number
     
 
@@ -756,11 +764,11 @@
             
             
             this.rightLeg = new THREE.Object3D();
-                    this.rightLeg.position.set(-7,-22,0);
+            this.rightLeg.position.set(-7,-22,0);
 
-                    let rightLegMesh = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 3, 13, 32),gg);
-                    rightLegMesh.position.set(0,-5.0,0);
-                    this.rightLeg.add(rightLegMesh);
+            let rightLegMesh = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 3, 13, 32),gg);
+            rightLegMesh.position.set(0,-5.0,0);
+            this.rightLeg.add(rightLegMesh);
           ////////////////////////////////////////////////////
             this.rightLeg2 = new THREE.Object3D();
             this.rightLeg2.position.set(0,-13.0,0);
@@ -1109,7 +1117,9 @@ function init() {
 
 	scene = new THREE.Scene();
   clock = new THREE.Clock();
-  
+  ////////////////////// SOUND source
+  Step2 = document.getElementById('Step2');
+  Step = document.getElementById('Step');
 
   document.addEventListener("keydown", onDocumentKeyDown, false);
   renderer = new THREE.WebGLRenderer();
@@ -1560,6 +1570,38 @@ function init() {
       playerpositionbox.add (starttext);
       starttext.position.set(-4, 37, -1000);
       })
+
+      loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
+        var text = 'Press "E" to cancel backup';
+          var geometry = new THREE.TextGeometry(text, {
+            font: font,
+            size: 0.5,
+            height: 0.01,
+            curveSegments: 12
+          });
+                
+
+      var material = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide});
+      canceltext = new THREE.Mesh( geometry, material );
+      playerpositionbox.add (canceltext);
+      canceltext.position.set(-4, 37, -1000);
+      })
+
+      loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
+        var text = 'Canceling';
+          var geometry = new THREE.TextGeometry(text, {
+            font: font,
+            size: 0.5,
+            height: 0.01,
+            curveSegments: 12
+          });
+                
+
+      var material = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide});
+      cancelingtext = new THREE.Mesh( geometry, material );
+      playerpositionbox.add (cancelingtext);
+      cancelingtext.position.set(-4, 37, -1000);
+      })
       
 
       playerlarm = makeArm();
@@ -1578,11 +1620,47 @@ function init() {
       scene.add( playerpositionbox );
       playerpositionbox.position.set(0,0,0);
 
-
-
+      //////////////////////////////////////////////// create positional audio helper
+      var listener = new THREE.AudioListener();
+      listener.crossOrigin = "anonymous";
+      camera.add(listener);
 
       
+      sound = new THREE.PositionalAudio( listener );
+      sound.setMediaElementSource( Step );
+      sound.setRefDistance( 80 );
+      sound.setDirectionalCone( 120, 240, 0.05 );
 
+      helper = new PositionalAudioHelper( sound, 10 );
+      sound.add(helper);
+      
+      var box = new THREE.BoxGeometry(5,5,5);
+      thebox = new THREE.Mesh(box,new THREE.MeshNormalMaterial());
+      thebox.rotation.y=-(Math.PI/2);
+
+      thebox.add(sound);
+      thebox.position.set(-90,40,-40);
+      scene.add(thebox);
+      //audioElement.play();
+
+      sound2 = new THREE.PositionalAudio( listener );
+      sound2.setMediaElementSource( Step2 );
+      sound2.setRefDistance( 80 );
+      sound2.setDirectionalCone( 120, 240, 0.05 );
+
+      helper2 = new PositionalAudioHelper( sound, 10 );
+      sound2.add(helper2);
+
+      thebox2 = new THREE.Mesh(box,new THREE.MeshNormalMaterial());
+      thebox2.rotation.y= Math.PI/2;
+      thebox2.add(sound2);
+      thebox2.position.set(90,40,-40);
+      scene.add(thebox2);
+      Step.play();
+      Step2.play();
+
+
+      //////////////////////////////////////////////////////////////
 
       /*
       camera2.position.y = 0;
@@ -1670,7 +1748,7 @@ function init() {
             }
           }
           else{
-            ghost.forward(0.5);
+            ghost.forward(2);
           }
         }
       }
@@ -1694,7 +1772,7 @@ function init() {
               }
           }
           else{
-            ghost.forward(-0.5);
+            ghost.forward(-2);
           }
         }
       }
@@ -1704,7 +1782,7 @@ function init() {
           rotest = Math.floor(Math.random()*100+1);
         }
         if(infloor==1){
-          if(rotest>50){
+          if(rotest>1){
             if(fin==0){
                 ghost.rotationY(0.1);
                 fin=1;
@@ -1712,7 +1790,7 @@ function init() {
             if(ghost.getrotaY()<1.5) ghost.rotationY(0.01);
             else{
               if(ghost.ghost.position.x<=240){
-                  ghost.forward(1);
+                  ghost.forward(2);
               }
               else{
                 infloor=8;
@@ -1728,7 +1806,7 @@ function init() {
             if(ghost.getrotaY()>4.7) ghost.rotationX(0.01);
             else{
               if(ghost.ghost.position.x>=-400){
-                  ghost.forward(-1);
+                  ghost.forward(-2);
               }
               else{
                   infloor=2;
@@ -1740,7 +1818,7 @@ function init() {
         else if(infloor==2){
           if(rotest>1){
             if(ghost.getrotaY()<6.25) ghost.rotationY(0.02);
-            else if(ghost.ghost.position.z<=-720) ghost.ghost.position.z+=1;
+            else if(ghost.ghost.position.z<=-720) ghost.ghost.position.z+=2;
             else{
               infloor=11;
               ran=0;
@@ -1748,7 +1826,7 @@ function init() {
           }
           else{
             if(ghost.getrotaY()>1.51||ghost.getrotaY()<1.48) ghost.rotationX(0.02);
-            else if(ghost.ghost.position.x<=230) ghost.ghost.position.x+=1;
+            else if(ghost.ghost.position.x<=230) ghost.ghost.position.x+=2;
             else{
               infloor=8;
               ran=0;
@@ -1758,7 +1836,7 @@ function init() {
         else if(infloor==3){
           if(rotest>1){
             if(ghost.getrotaY()>1.51||ghost.getrotaY()<1.48) ghost.rotationY(0.02);
-            else if(ghost.ghost.position.x<=-200) ghost.ghost.position.x+=1;
+            else if(ghost.ghost.position.x<=-200) ghost.ghost.position.x+=2;
             else{
               infloor=4;
               ran=0;
@@ -1766,7 +1844,7 @@ function init() {
           }
           else{
             if(ghost.getrotaY()>3.15||ghost.getrotaY()<3.13) ghost.rotationX(0.02);
-            else if(ghost.ghost.position.z>=-720) ghost.ghost.position.z-=1;
+            else if(ghost.ghost.position.z>=-720) ghost.ghost.position.z-=2;
             else{
               infloor=11;
               ran=0;
@@ -1776,7 +1854,7 @@ function init() {
         else if(infloor==4){
           if(rotest<0){
             if(ghost.getrotaY()<4.7||ghost.getrotaY()>4.8) ghost.rotationY(0.02);
-            else if(ghost.ghost.position.x>=-400) ghost.ghost.position.x-=1;
+            else if(ghost.ghost.position.x>=-400) ghost.ghost.position.x-=2;
             else{
               infloor=3;
               ran=0;
@@ -1784,7 +1862,7 @@ function init() {
           }
           else{
             if(ghost.getrotaY()>0.03) ghost.rotationX(0.02);
-            else if(ghost.ghost.position.z<=-400) ghost.ghost.position.z+=1;
+            else if(ghost.ghost.position.z<=-400) ghost.ghost.position.z+=2;
             else{
               infloor=5;
               ran=0;
@@ -1794,7 +1872,7 @@ function init() {
         else if(infloor==5){
           if(rotest>1){
             if(ghost.getrotaY()>1.51||ghost.getrotaY()<1.48) ghost.rotationY(0.02);
-            else if(ghost.ghost.position.x<=-150) ghost.ghost.position.x+=1;
+            else if(ghost.ghost.position.x<=-150) ghost.ghost.position.x+=2;
             else{
               infloor=6;
               ran=0;
@@ -1802,7 +1880,7 @@ function init() {
           }
           else{
             if(ghost.getrotaY()>3.15||ghost.getrotaY()<3.13) ghost.rotationX(0.02);
-            else if(ghost.ghost.position.z>=-600) ghost.ghost.position.z-=1;
+            else if(ghost.ghost.position.z>=-600) ghost.ghost.position.z-=2;
             else{
               infloor=4;
               ran=0;
@@ -1812,7 +1890,7 @@ function init() {
         else if(infloor==6){
           if(rotest<0){
             if(ghost.getrotaY()>1.51||ghost.getrotaY()<1.48) ghost.rotationY(0.02);
-            else if(ghost.ghost.position.x<=150) ghost.ghost.position.x+=1;
+            else if(ghost.ghost.position.x<=150) ghost.ghost.position.x+=2;
             else{
               infloor=7;
               ran=0;
@@ -1820,7 +1898,7 @@ function init() {
           }
           else if(rotest<0){
             if(ghost.getrotaY()<4.7||ghost.getrotaY()>4.8) ghost.rotationX(0.02);
-            else if(ghost.ghost.position.x>=-200) ghost.ghost.position.x-=1;
+            else if(ghost.ghost.position.x>=-200) ghost.ghost.position.x-=2;
             else{
               infloor=5;
               ran=0;
@@ -1835,7 +1913,7 @@ function init() {
         else if(infloor==7){
           if(rotest<0){
             if(ghost.getrotaY()>1.51||ghost.getrotaY()<1.48) ghost.rotationY(0.02);
-              else if(ghost.ghost.position.x<=230) ghost.ghost.position.x+=1;
+              else if(ghost.ghost.position.x<=230) ghost.ghost.position.x+=2;
               else{
                 infloor=9;
                 ran=0;
@@ -1843,7 +1921,7 @@ function init() {
           }
           else if(rotest<0){
             if(ghost.getrotaY()<4.7||ghost.getrotaY()>4.8) ghost.rotationX(0.02);
-            else if(ghost.ghost.position.x>=-150) ghost.ghost.position.x-=1;
+            else if(ghost.ghost.position.x>=-150) ghost.ghost.position.x-=2;
             else{
               infloor=6;
               ran=0;
@@ -1858,7 +1936,7 @@ function init() {
         else if(infloor==9){
           if(rotest<0){
             if(ghost.getrotaY()>3.15||ghost.getrotaY()<3.13) ghost.rotationY(0.02);
-            else if(ghost.ghost.position.z>=-720) ghost.ghost.position.z-=1;
+            else if(ghost.ghost.position.z>=-720) ghost.ghost.position.z-=2;
             else{
               infloor=10;
               ran=0;
@@ -1866,7 +1944,7 @@ function init() {
           }
           else{
             if(ghost.getrotaY()<4.7||ghost.getrotaY()>4.8) ghost.rotationX(0.02);
-            else if(ghost.ghost.position.x>=150) ghost.ghost.position.x-=1;
+            else if(ghost.ghost.position.x>=150) ghost.ghost.position.x-=2;
             else{
               infloor=7;
               ran=0;
@@ -1876,7 +1954,7 @@ function init() {
         else if(infloor==8){
           if(rotest<0){
             if(ghost.getrotaY()<4.7) ghost.rotationY(0.02);
-            else if(ghost.ghost.position.x>=-400) ghost.ghost.position.x-=1;
+            else if(ghost.ghost.position.x>=-400) ghost.ghost.position.x-=2;
             else{
               infloor=2;
               ran=0;
@@ -1884,7 +1962,7 @@ function init() {
           }
           else{
             if(ghost.getrotaY()>0.02) ghost.rotationX(0.02);
-            else if(ghost.ghost.position.z<=-720) ghost.ghost.position.z+=1;
+            else if(ghost.ghost.position.z<=-720) ghost.ghost.position.z+=2;
             else{
               infloor=10;
               ran=0;
@@ -1894,7 +1972,7 @@ function init() {
         else if(infloor==10){
           if(rotest<0){
             if(ghost.getrotaY()<4.7||ghost.getrotaY()>4.8) ghost.rotationY(0.02);
-            else if(ghost.ghost.position.x>=-400) ghost.ghost.position.x-=1;
+            else if(ghost.ghost.position.x>=-400) ghost.ghost.position.x-=2;
             else{
               infloor=11;
               ran=0;
@@ -1902,7 +1980,7 @@ function init() {
           }
           else if(rotest<0){
             if(ghost.getrotaY()>3.15||ghost.getrotaY()<3.13) ghost.rotationX(0.02);
-            else if(ghost.ghost.position.z>=-875) ghost.ghost.position.z-=1;
+            else if(ghost.ghost.position.z>=-875) ghost.ghost.position.z-=2;
             else{
               infloor=8;
               ran=0;
@@ -1910,7 +1988,7 @@ function init() {
           }
           else{
             if(ghost.getrotaY()<6.27&&ghost.getrotaY()>0.03)  ghost.rotationY(0.02);
-            else if(ghost.ghost.position.z<=-400) ghost.ghost.position.z+=1;
+            else if(ghost.ghost.position.z<=-400) ghost.ghost.position.z+=2;
             else{
               infloor=9;
               ran=0;
@@ -1920,7 +1998,7 @@ function init() {
         else if(infloor==11){
           if(rotest>1){
             if(ghost.getrotaY()>0.05&&ghost.getrotaY()<6.25)  ghost.rotationY(0.02);
-            else if(ghost.ghost.position.z<=-600) ghost.ghost.position.z+=1;
+            else if(ghost.ghost.position.z<=-600) ghost.ghost.position.z+=2;
             else{
               infloor=3;
               ran=0;
@@ -1928,15 +2006,15 @@ function init() {
           }
           else if(rotest<0){
             if(ghost.getrotaY()>3.15||ghost.getrotaY()<3.13) ghost.rotationX(0.02);
-            else if(ghost.ghost.position.z>=-875) ghost.ghost.position.z-=1;
+            else if(ghost.ghost.position.z>=-875) ghost.ghost.position.z-=2;
             else{
               infloor=2;
-              ran=0;
+              ran=0;w
             }                    
           }
           else{
             if(ghost.getrotaY()>1.51||ghost.getrotaY()<1.48) ghost.rotationY(0.02);
-            else if(ghost.ghost.position.x<=230) ghost.ghost.position.x+=1;
+            else if(ghost.ghost.position.x<=230) ghost.ghost.position.x+=2;
             else{
               infloor=10;
               ran=0;
@@ -1944,8 +2022,10 @@ function init() {
           }
         }
       }
-      ////////////////////////////////// 10號點 (-150,400)
+      ////////////////////////////////// 10號點 (-150,400)  7號點 (150close
       if(condict==4){
+        //thebox.lookAt(ghost2.ghost.position);
+        thebox2.lookAt(100,40,-40);
         if(release==0){
             ghost2.ghost.position.set(-150,0,-400);
             ghost2.changebodyY(45);
@@ -1957,6 +2037,8 @@ function init() {
           else if(ghost.ghost.position.z<=-20){
             ghost.ghost.position.z+=1;
             ghost2.ghost.position.z+=1;
+            thebox.rotation.y+=0.005;
+            helper.update();
             com=1;
           }
           else if((ghost.getrotaY()>1.51||ghost.getrotaY()<1.48)&&com==1){
@@ -1973,6 +2055,8 @@ function init() {
           }  
       }
       else if(condict==5){
+        //thebox2.lookAt(ghost2.ghost.position);
+        thebox.lookAt(-100,40,-40);
         if(release==0){
             ghost2.ghost.position.set(150,0,-400);
             ghost2.changebodyY(45);
@@ -1984,6 +2068,8 @@ function init() {
         else if(ghost.ghost.position.z<=-20){
             ghost.ghost.position.z+=1;
             ghost2.ghost.position.z+=1;
+            thebox2.rotation.y-=0.005;
+            helper2.update();
             com=1;
         }
         else if((ghost.getrotaY()<4.7||ghost.getrotaY()>4.8)&&com==1){
@@ -1998,15 +2084,21 @@ function init() {
           condict=6;
           com=0;
         }          
-      }              
+      }
+
+      ////////////////////////////////////////////////////////////////////// search people
+      if(condict==6){
+
+      }
+
       /////////////////////////////////////////////////////////////////////// set origin position
       requestAnimationFrame(animate);
       //render();
       if(gamestart == 1){
-        if(Math.floor(progressclock.getElapsedTime() * 10 / 36) != Progressnow && Progressnow <= 100){
-          Progressnow = Math.floor(progressclock.getElapsedTime() * 10 / 36);
+        if(Math.floor(progresstimesum * 10 / 36) != Progressnow && Progressnow <= 100){
+          Progressnow = Math.floor(progresstimesum * 10 / 36);
           progress();
-        }  
+        }
       }
       camerarotation(rotationy);
       var dt = clock.getDelta();
@@ -2056,11 +2148,23 @@ function init() {
           isranged = 0;
       }
 
+      if(playerpositionbox.position.x <= -30 && camera.position.x >= -65 && iscanceled == 1){
+        if(playerpositionbox.position.z >= -45 && camera.position.z <= -30 && iscanceled == 1){
+          cancelingtext.position.set(-2, 37, -10);
+        }   
+        else{
+          cancelingtext.position.set(-4, 37, -1000);
+        }
+      }
+      else {
+        cancelingtext.position.set(-4, 37, -1000);
+      }
+
+      if(stop == 1){
+        progresstimesum += progressclock.getDelta();
+      }
 
 
-
-        
-        
       t += clock.getDelta();
       t %= 30.6;
       keyframe(t);
@@ -2139,11 +2243,11 @@ function init() {
     function progress(){
       var loader = new THREE.FontLoader();
       loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
-        if(Math.floor(progressclock.getElapsedTime() * 10 / 36) < 10){
-          var text = "    " + Math.floor(progressclock.getElapsedTime() * 10 / 36) + "%";
+        if(Math.floor(progresstimesum * 10 / 36) < 10){
+          var text = "    " + Math.floor(progresstimesum * 10 / 36) + "%";
         }
-        else if(Math.floor(progressclock.getElapsedTime() * 10 / 36) < 100){
-          var text = "  " + Math.floor(progressclock.getElapsedTime() * 10 / 36) + "%";
+        else if(Math.floor(progresstimesum * 10 / 36) < 100){
+          var text = "  " + Math.floor(progresstimesum * 10 / 36) + "%";
         }
         else var text = '100%';
           var geometry = new THREE.TextGeometry(text, {
@@ -2573,7 +2677,7 @@ function init() {
     else if (keyCode == 79){
       condict=2;
     }
-    else if(keyCode == 17 && controling == 0){
+    if(keyCode == 17 && controling == 0){
       if(standup == 0 && playerpositionbox.position.z <= 40){
         standup = 1;
         controling = 1;
@@ -2589,313 +2693,344 @@ function init() {
       if(standup == 0) standup = 1;
       else standup = 0;
     }
+    if (keyCode == 69) {
+      if(isranged == 1 && iscanceled == 0 && stop == 0){
+        playerstate = 1;
+        keyboarding = 1;
+        startflag = 0;
+        stop=1;
+        if(gamestart == 0) playerstate1timeout();
+        canceltext.position.set(-4, 37, -10);
+        progressclock.start();
+      }
+      else if(stop == 1){
+        stop = 0;
+        iscanceled = 1;
+        canceltext.position.set(-4, 37, -1000);
+        keyboarding = 0;
+        setTimeout(canceled,3000);
+        progressclock.stop();
+      } 
+    }
+
 	}
 
 
 function update(dt) {
   
   keyboard.update();
-  if ( keyboard.pressed("A") ) {
-    playerstate = 2;
-    camera.getWorldDirection(test);
-    camera.position.x += test.z;
-    camera.position.z -= test.x;
-    playerpositionbox.position.x += test.z;
-    playerpositionbox.position.z -= test.x;
+  if(stop==0){
+    if ( keyboard.pressed("A") ) {
+      playerstate = 2;
+      camera.getWorldDirection(test);
+      camera.position.x += test.z;
+      camera.position.z -= test.x;
+      playerpositionbox.position.x += test.z;
+      playerpositionbox.position.z -= test.x;
 
 
-    if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
-    else canentertable = 0;
+      if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
+      else canentertable = 0;
 
-    if(canentertable == 1){ 
-      if(camera.position.z > 45) undertable = 1;
+      if(canentertable == 1){ 
+        if(camera.position.z > 45) undertable = 1;
+        else undertable = 0;
+        if(camera.position.z > 80){
+          camera.position.z = 80;
+          playerpositionbox.position.z = 80;
+        }   
+      }
       else undertable = 0;
-      if(camera.position.z > 80){
-        camera.position.z = 80;
-        playerpositionbox.position.z = 80;
-      }   
-    }
-    else undertable = 0;
 
-    if(camera.position.z > 40 && canentertable == 0){
-      camera.position.z = 40;
-      playerpositionbox.position.z = 40;
-    } 
+      if(camera.position.z > 40 && canentertable == 0){
+        camera.position.z = 40;
+        playerpositionbox.position.z = 40;
+      } 
 
-    if(canentertable == 1 && camera.position.z > 40){
-      if(camera.position.x > 29){
-        camera.position.x = 29;
-        playerpositionbox.position.x = 29;
+      if(canentertable == 1 && camera.position.z > 40){
+        if(camera.position.x > 29){
+          camera.position.x = 29;
+          playerpositionbox.position.x = 29;
+        }
+        else if(camera.position.x < -29){
+          camera.position.x = -29;
+          playerpositionbox.position.x = -29;
+        }
       }
-      else if(camera.position.x < -29){
-        camera.position.x = -29;
-        playerpositionbox.position.x = -29;
+
+
+
+
+      if(camera.position.x > 80.01){
+        camera.position.x = 80;
+        playerpositionbox.position.x = 80;
       }
+      if(camera.position.x < -80.01){
+        camera.position.x = -80;
+        playerpositionbox.position.x = -80;
+      }
+      if(camera.position.x <= 50 && camera.position.x >= -50){
+        if(camera.position.z < -45) camera.position.z = -45; 
+        if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
+      }
+      if(camera.position.x >= 50 && camera.position.x <= 70){
+          var tmp = -45 + (camera.position.x - 50) * 1.8;
+          if(camera.position.z < tmp) camera.position.z = tmp;
+          if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
+      }
+      if(camera.position.x >= 70 && camera.position.x <= 80){
+          if(camera.position.z < -9) camera.position.z = -9;
+          if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
+      }
+      if(camera.position.x <= -50 && camera.position.x >= -70){
+          var tmp = -45 + (-camera.position.x - 50) * 1.8;
+          if(camera.position.z < tmp) camera.position.z = tmp;
+          if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
+      }
+      if(camera.position.x <= -70 && camera.position.x >= -80){
+          if(camera.position.z < -9) camera.position.z = -9;
+          if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
+      }
+
+      
+      
+      
     }
 
+    else if ( keyboard.pressed("D") ){
+      playerstate = 2;
+      camera.getWorldDirection(test);
+      camera.position.x -= test.z;
+      camera.position.z += test.x;
+      playerpositionbox.position.x -= test.z;
+      playerpositionbox.position.z += test.x;
 
+      if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
+      else canentertable = 0;
 
-
-    if(camera.position.x > 80.01){
-      camera.position.x = 80;
-      playerpositionbox.position.x = 80;
-    }
-    if(camera.position.x < -80.01){
-      camera.position.x = -80;
-      playerpositionbox.position.x = -80;
-    }
-    if(camera.position.x <= 50 && camera.position.x >= -50){
-      if(camera.position.z < -45) camera.position.z = -45; 
-      if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
-    }
-    if(camera.position.x >= 50 && camera.position.x <= 70){
-        var tmp = -45 + (camera.position.x - 50) * 1.8;
-        if(camera.position.z < tmp) camera.position.z = tmp;
-        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
-    }
-    if(camera.position.x >= 70 && camera.position.x <= 80){
-        if(camera.position.z < -9) camera.position.z = -9;
-        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
-    }
-    if(camera.position.x <= -50 && camera.position.x >= -70){
-        var tmp = -45 + (-camera.position.x - 50) * 1.8;
-        if(camera.position.z < tmp) camera.position.z = tmp;
-        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
-    }
-    if(camera.position.x <= -70 && camera.position.x >= -80){
-        if(camera.position.z < -9) camera.position.z = -9;
-        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
-    }
-
-    
-    
-    
-  }
-
-  else if ( keyboard.pressed("D") ){
-    playerstate = 2;
-    camera.getWorldDirection(test);
-    camera.position.x -= test.z;
-    camera.position.z += test.x;
-    playerpositionbox.position.x -= test.z;
-    playerpositionbox.position.z += test.x;
-
-    if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
-    else canentertable = 0;
-
-    if(canentertable == 1){ 
-      if(camera.position.z > 45) undertable = 1;
+      if(canentertable == 1){ 
+        if(camera.position.z > 45) undertable = 1;
+        else undertable = 0;
+        if(camera.position.z > 80){
+          camera.position.z = 80;
+          playerpositionbox.position.z = 80;
+        }   
+      }
       else undertable = 0;
-      if(camera.position.z > 80){
-        camera.position.z = 80;
-        playerpositionbox.position.z = 80;
-      }   
-    }
-    else undertable = 0;
 
-    if(camera.position.z > 40 && canentertable == 0){
-      camera.position.z = 40;
-      playerpositionbox.position.z = 40;
-    } 
+      if(camera.position.z > 40 && canentertable == 0){
+        camera.position.z = 40;
+        playerpositionbox.position.z = 40;
+      } 
 
-    if(canentertable == 1 && camera.position.z > 40){
-      if(camera.position.x > 29){
-        camera.position.x = 29;
-        playerpositionbox.position.x = 29;
+      if(canentertable == 1 && camera.position.z > 40){
+        if(camera.position.x > 29){
+          camera.position.x = 29;
+          playerpositionbox.position.x = 29;
+        }
+        else if(camera.position.x < -29){
+          camera.position.x = -29;
+          playerpositionbox.position.x = -29;
+        }
       }
-      else if(camera.position.x < -29){
-        camera.position.x = -29;
-        playerpositionbox.position.x = -29;
+
+
+
+      if(camera.position.x > 80.01){
+        camera.position.x = 80;
+        playerpositionbox.position.x = 80;
       }
-    }
+      if(camera.position.x < -80.01){
+        camera.position.x = -80;
+        playerpositionbox.position.x = -80;
+      }
+      if(camera.position.x <= 50 && camera.position.x >= -50){
+        if(camera.position.z < -45) camera.position.z = -45; 
+        if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
+      }
+      if(camera.position.x >= 50 && camera.position.x <= 70){
+          var tmp = -45 + (camera.position.x - 50) * 1.8;
+          if(camera.position.z < tmp) camera.position.z = tmp;
+          if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
+      }
+      if(camera.position.x >= 70 && camera.position.x <= 80){
+          if(camera.position.z < -9) camera.position.z = -9;
+          if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
+      }
+      if(camera.position.x <= -50 && camera.position.x >= -70){
+          var tmp = -45 + (-camera.position.x - 50) * 1.8;
+          if(camera.position.z < tmp) camera.position.z = tmp;
+          if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
+      }
+      if(camera.position.x <= -70 && camera.position.x >= -80){
+          if(camera.position.z < -9) camera.position.z = -9;
+          if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
+      }
 
+    }
+    else if ( keyboard.pressed("W") ){
+      playerstate = 2;
+      camera.getWorldDirection(test);
+      camera.position.x += test.x;
+      camera.position.z += test.z;
+      playerpositionbox.position.x += test.x;
+      playerpositionbox.position.z += test.z;
 
+      if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
+      else canentertable = 0;
 
-    if(camera.position.x > 80.01){
-      camera.position.x = 80;
-      playerpositionbox.position.x = 80;
-    }
-    if(camera.position.x < -80.01){
-      camera.position.x = -80;
-      playerpositionbox.position.x = -80;
-    }
-    if(camera.position.x <= 50 && camera.position.x >= -50){
-      if(camera.position.z < -45) camera.position.z = -45; 
-      if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
-    }
-    if(camera.position.x >= 50 && camera.position.x <= 70){
-        var tmp = -45 + (camera.position.x - 50) * 1.8;
-        if(camera.position.z < tmp) camera.position.z = tmp;
-        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
-    }
-    if(camera.position.x >= 70 && camera.position.x <= 80){
-        if(camera.position.z < -9) camera.position.z = -9;
-        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
-    }
-    if(camera.position.x <= -50 && camera.position.x >= -70){
-        var tmp = -45 + (-camera.position.x - 50) * 1.8;
-        if(camera.position.z < tmp) camera.position.z = tmp;
-        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
-    }
-    if(camera.position.x <= -70 && camera.position.x >= -80){
-        if(camera.position.z < -9) camera.position.z = -9;
-        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
-    }
-
-  }
-  else if ( keyboard.pressed("W") ){
-    playerstate = 2;
-    camera.getWorldDirection(test);
-    camera.position.x += test.x;
-    camera.position.z += test.z;
-    playerpositionbox.position.x += test.x;
-    playerpositionbox.position.z += test.z;
-
-    if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
-    else canentertable = 0;
-
-    if(canentertable == 1){ 
-      if(camera.position.z > 45) undertable = 1;
+      if(canentertable == 1){ 
+        if(camera.position.z > 45) undertable = 1;
+        else undertable = 0;
+        if(camera.position.z > 80){
+          camera.position.z = 80;
+          playerpositionbox.position.z = 80;
+        }   
+      }
       else undertable = 0;
-      if(camera.position.z > 80){
-        camera.position.z = 80;
-        playerpositionbox.position.z = 80;
-      }   
-    }
-    else undertable = 0;
 
-    if(camera.position.z > 40 && canentertable == 0){
-      camera.position.z = 40;
-      playerpositionbox.position.z = 40;
-    } 
+      if(camera.position.z > 40 && canentertable == 0){
+        camera.position.z = 40;
+        playerpositionbox.position.z = 40;
+      } 
 
-    if(canentertable == 1 && camera.position.z > 40){
-      if(camera.position.x > 29){
-        camera.position.x = 29;
-        playerpositionbox.position.x = 29;
+      if(canentertable == 1 && camera.position.z > 40){
+        if(camera.position.x > 29){
+          camera.position.x = 29;
+          playerpositionbox.position.x = 29;
+        }
+        else if(camera.position.x < -29){
+          camera.position.x = -29;
+          playerpositionbox.position.x = -29;
+        }
       }
-      else if(camera.position.x < -29){
-        camera.position.x = -29;
-        playerpositionbox.position.x = -29;
+
+      if(camera.position.x > 80.01){
+        camera.position.x = 80;
+        playerpositionbox.position.x = 80;
       }
-    }
+      if(camera.position.x < -80.01){
+        camera.position.x = -80;
+        playerpositionbox.position.x = -80;
+      }
+      if(camera.position.x <= 50 && camera.position.x >= -50){
+        if(camera.position.z < -45) camera.position.z = -45; 
+        if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
+      }
+      if(camera.position.x >= 50 && camera.position.x <= 70){
+          var tmp = -45 + (camera.position.x - 50) * 1.8;
+          if(camera.position.z < tmp) camera.position.z = tmp;
+          if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
+      }
+      if(camera.position.x >= 70 && camera.position.x <= 80){
+          if(camera.position.z < -9) camera.position.z = -9;
+          if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
+      }
+      if(camera.position.x <= -50 && camera.position.x >= -70){
+          var tmp = -45 + (-camera.position.x - 50) * 1.8;
+          if(camera.position.z < tmp) camera.position.z = tmp;
+          if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
+      }
+      if(camera.position.x <= -70 && camera.position.x >= -80){
+          if(camera.position.z < -9) camera.position.z = -9;
+          if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
+      }
 
-    if(camera.position.x > 80.01){
-      camera.position.x = 80;
-      playerpositionbox.position.x = 80;
+      
+      
     }
-    if(camera.position.x < -80.01){
-      camera.position.x = -80;
-      playerpositionbox.position.x = -80;
-    }
-    if(camera.position.x <= 50 && camera.position.x >= -50){
-      if(camera.position.z < -45) camera.position.z = -45; 
-      if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
-    }
-    if(camera.position.x >= 50 && camera.position.x <= 70){
-        var tmp = -45 + (camera.position.x - 50) * 1.8;
-        if(camera.position.z < tmp) camera.position.z = tmp;
-        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
-    }
-    if(camera.position.x >= 70 && camera.position.x <= 80){
-        if(camera.position.z < -9) camera.position.z = -9;
-        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
-    }
-    if(camera.position.x <= -50 && camera.position.x >= -70){
-        var tmp = -45 + (-camera.position.x - 50) * 1.8;
-        if(camera.position.z < tmp) camera.position.z = tmp;
-        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
-    }
-    if(camera.position.x <= -70 && camera.position.x >= -80){
-        if(camera.position.z < -9) camera.position.z = -9;
-        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
-    }
-
-    
-    
-  }
-  else if ( keyboard.pressed("S") ){
-    playerstate = 2;
-    camera.getWorldDirection(test);
-    camera.position.x -= test.x;
-    camera.position.z -= test.z;
-    playerpositionbox.position.x -= test.x;
-    playerpositionbox.position.z -= test.z;
+    else if ( keyboard.pressed("S") ){
+      playerstate = 2;
+      camera.getWorldDirection(test);
+      camera.position.x -= test.x;
+      camera.position.z -= test.z;
+      playerpositionbox.position.x -= test.x;
+      playerpositionbox.position.z -= test.z;
 
 
-    if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
-    else canentertable = 0;
+      if(standup == 0 && controling == 0 && camera.position.x <= 30 && camera.position.x >= -30) canentertable = 1;
+      else canentertable = 0;
 
-    if(canentertable == 1){ 
-      if(camera.position.z > 45) undertable = 1;
+      if(canentertable == 1){ 
+        if(camera.position.z > 45) undertable = 1;
+        else undertable = 0;
+        if(camera.position.z > 80){
+          camera.position.z = 80;
+          playerpositionbox.position.z = 80;
+        }   
+      }
       else undertable = 0;
-      if(camera.position.z > 80){
-        camera.position.z = 80;
-        playerpositionbox.position.z = 80;
-      }   
-    }
-    else undertable = 0;
 
-    if(camera.position.z > 40 && canentertable == 0){
-      camera.position.z = 40;
-      playerpositionbox.position.z = 40;
-    } 
+      if(camera.position.z > 40 && canentertable == 0){
+        camera.position.z = 40;
+        playerpositionbox.position.z = 40;
+      } 
 
-    if(canentertable == 1 && camera.position.z > 40){
-      if(camera.position.x > 29){
-        camera.position.x = 29;
-        playerpositionbox.position.x = 29;
+      if(canentertable == 1 && camera.position.z > 40){
+        if(camera.position.x > 29){
+          camera.position.x = 29;
+          playerpositionbox.position.x = 29;
+        }
+        else if(camera.position.x < -29){
+          camera.position.x = -29;
+          playerpositionbox.position.x = -29;
+        }
       }
-      else if(camera.position.x < -29){
-        camera.position.x = -29;
-        playerpositionbox.position.x = -29;
+
+
+
+      if(camera.position.x > 80.01){
+        camera.position.x = 80;
+        playerpositionbox.position.x = 80;
       }
-    }
+      if(camera.position.x < -80.01){
+        camera.position.x = -80;
+        playerpositionbox.position.x = -80;
+      }
+      if(camera.position.x <= 50 && camera.position.x >= -50){
+        if(camera.position.z < -45) camera.position.z = -45; 
+        if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
+      }
+      if(camera.position.x >= 50 && camera.position.x <= 70){
+          var tmp = -45 + (camera.position.x - 50) * 1.8;
+          if(camera.position.z < tmp) camera.position.z = tmp;
+          if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
+      }
+      if(camera.position.x >= 70 && camera.position.x <= 80){
+          if(camera.position.z < -9) camera.position.z = -9;
+          if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
+      }
+      if(camera.position.x <= -50 && camera.position.x >= -70){
+          var tmp = -45 + (-camera.position.x - 50) * 1.8;
+          if(camera.position.z < tmp) camera.position.z = tmp;
+          if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
+      }
+      if(camera.position.x <= -70 && camera.position.x >= -80){
+          if(camera.position.z < -9) camera.position.z = -9;
+          if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
+      }
 
-
-
-    if(camera.position.x > 80.01){
-      camera.position.x = 80;
-      playerpositionbox.position.x = 80;
     }
-    if(camera.position.x < -80.01){
-      camera.position.x = -80;
-      playerpositionbox.position.x = -80;
-    }
-    if(camera.position.x <= 50 && camera.position.x >= -50){
-      if(camera.position.z < -45) camera.position.z = -45; 
-      if(playerpositionbox.position.z < -45) playerpositionbox.position.z = -45;     
-    }
-    if(camera.position.x >= 50 && camera.position.x <= 70){
-        var tmp = -45 + (camera.position.x - 50) * 1.8;
-        if(camera.position.z < tmp) camera.position.z = tmp;
-        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
-    }
-    if(camera.position.x >= 70 && camera.position.x <= 80){
-        if(camera.position.z < -9) camera.position.z = -9;
-        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
-    }
-    if(camera.position.x <= -50 && camera.position.x >= -70){
-        var tmp = -45 + (-camera.position.x - 50) * 1.8;
-        if(camera.position.z < tmp) camera.position.z = tmp;
-        if(playerpositionbox.position.z < tmp) playerpositionbox.position.z = tmp;
-    }
-    if(camera.position.x <= -70 && camera.position.x >= -80){
-        if(camera.position.z < -9) camera.position.z = -9;
-        if(playerpositionbox.position.z < -9) playerpositionbox.position.z = -9;
-    }
-
   }
-  else if ( keyboard.pressed("E") ) {
-    if(isranged == 1){
-      playerstate = 1;
-      keyboarding = 1;
-      startflag = 0;
-      setTimeout(playerstate1timeout,3000);
-    } 
-  }
+  /*
+  if ( keyboard.pressed("E") ) {
+      if(isranged == 1 && iscanceled == 0 && stop == 0){
+        console.log("ajdwio");
+        playerstate = 1;
+        keyboarding = 1;
+        startflag = 0;
+        stop=1;
+        setTimeout(playerstate1timeout,3000);
+        canceltext.position.set(-4, 37, -10);
+      }
+      if(stop == 1){
+        stop = 0;
+        iscanceled = 1;
+        canceltext.position.set(-4, 37, -1000);
+        setTimeout(canceled,3000);
+      } 
+  }*/
   
-
 }
 
 
@@ -7044,49 +7179,54 @@ function mapbuttom1(event) {
 
 }
 
+function canceled(){
+  iscanceled = 0;
+  startflag = 1;
+}
+
+
 function playerstate1timeout(){
-  keyboarding = 0;
-  playerstate = 0;
-  Progressnow = 0;
-  progressclock = new THREE.Clock();
-      var loader = new THREE.FontLoader();
-      loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
-        if(Math.floor(progressclock.getElapsedTime() * 10 / 36) < 10) var text = "    " + Math.floor(progressclock.getElapsedTime() * 10 / 36) + "%";
-        else var text = '0%';
-          var geometry = new THREE.TextGeometry(text, {
-            font: font,
-            size: 4,
-            height: 2.8,
-            curveSegments: 12
-          });
-                
+    Progressnow = 0;
+    progressclock = new THREE.Clock();
+        var loader = new THREE.FontLoader();
+        loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
+          if(Math.floor(progressclock.getElapsedTime() * 10 / 36) < 10) var text = "    " + Math.floor(progressclock.getElapsedTime() * 10 / 36) + "%";
+          else var text = '0%';
+            var geometry = new THREE.TextGeometry(text, {
+              font: font,
+              size: 4,
+              height: 2.8,
+              curveSegments: 12
+            });
+                  
 
-      var material = new THREE.MeshBasicMaterial({color: 0x3db851, side: THREE.DoubleSide});
-      progresstext1 = new THREE.Mesh( geometry, material );
-      scene.add( progresstext1 );
-      progresstext1.position.set(-75, 45, -70);
-      progresstext1.rotation.y += Math.PI/4;
-      })
+        var material = new THREE.MeshBasicMaterial({color: 0x3db851, side: THREE.DoubleSide});
+        progresstext1 = new THREE.Mesh( geometry, material );
+        scene.add( progresstext1 );
+        progresstext1.position.set(-75, 45, -70);
+        progresstext1.rotation.y += Math.PI/4;
+        })
 
-      loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
+        loader.load('https://raw.githack.com/mrdoob/three.js/master/examples/fonts/droid/droid_sans_bold.typeface.json', function(font){
 
-      var text = '';   //14 is full
-      var geometry = new THREE.TextGeometry(text, {
-        font: font,
-        size: 3.9,
-        height: 2.8,
-        curveSegments: 12
-      });
-            
+        var text = '';   //14 is full
+        var geometry = new THREE.TextGeometry(text, {
+          font: font,
+          size: 3.9,
+          height: 2.8,
+          curveSegments: 12
+        });
+              
 
-      var material = new THREE.MeshBasicMaterial({color: 0x3db851, side: THREE.DoubleSide});
-      progresstext2 = new THREE.Mesh( geometry, material );
-      scene.add( progresstext2 );
-      progresstext2.position.set(-78.2, 39, -66.8);
-      progresstext2.rotation.y += Math.PI/4;
-      })
-    progressline.position.z += 0.2;
-    gamestart = 1;
+        var material = new THREE.MeshBasicMaterial({color: 0x3db851, side: THREE.DoubleSide});
+        progresstext2 = new THREE.Mesh( geometry, material );
+        scene.add( progresstext2 );
+        progresstext2.position.set(-78.2, 39, -66.8);
+        progresstext2.rotation.y += Math.PI/4;
+        })
+      progressline.position.z += 0.2;
+      gamestart = 1;
+  
     
 }
 
